@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
@@ -32,6 +33,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private TextToSpeech tts;
     private boolean ttsReady = false;
+    private boolean pageReady = false;
     private SharedPreferences prefs;
 
     @Override
@@ -73,7 +75,19 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
-        web.setWebViewClient(new WebViewClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                pageReady = true;
+                pushInsets();
+            }
+        });
+        // Die Oberfläche zeichnet hinter den Systemleisten; melde ihr, wie viel
+        // Platz Status- und Navigationsleiste oben und unten beanspruchen.
+        web.setOnApplyWindowInsetsListener((v, insets) -> {
+            pushInsets();
+            return insets;
+        });
         web.setBackgroundColor(0xFF06131C);
         web.addJavascriptInterface(new TtsBridge(), "AndroidTTS");
         web.addJavascriptInterface(new StoreBridge(), "AndroidStore");
@@ -81,6 +95,54 @@ public class MainActivity extends Activity {
         setContentView(web);
         hideBars();
         web.loadUrl("file:///android_asset/index.html");
+    }
+
+    /**
+     * Reicht die Höhe der Systemleisten als CSS-Variablen an die Oberfläche
+     * weiter. Im Vollbild liefert env(safe-area-inset-top) im WebView 0, die
+     * Statusleiste blendet sich aber jederzeit wieder ein und schnitte sonst
+     * die Überschriften oben ab. Gemessen wird deshalb die Höhe, die die
+     * Leisten einnehmen, wenn sie sichtbar sind.
+     */
+    private void pushInsets() {
+        if (web == null || !pageReady) return;
+        float density = getResources().getDisplayMetrics().density;
+        if (density <= 0f) density = 1f;
+        int top = Math.round(barInsetPx(true) / density);
+        int bottom = Math.round(barInsetPx(false) / density);
+        String js = "document.documentElement.style.setProperty('--safe-top','" + top + "px');"
+                + "document.documentElement.style.setProperty('--safe-bottom','" + bottom + "px');";
+        web.evaluateJavascript(js, null);
+    }
+
+    /**
+     * Oben die Höhe der Statusleiste, auch wenn sie gerade verborgen ist: im
+     * Vollbild schiebt sie sich jederzeit wieder über die Seite und darf die
+     * Überschrift nie abdecken. Unten dagegen nur die tatsächlich sichtbare
+     * Navigationsleiste, damit ohne sie keine leere Lücke entsteht.
+     */
+    private int barInsetPx(boolean top) {
+        WindowInsets insets = web.getRootWindowInsets();
+        if (insets != null) {
+            if (Build.VERSION.SDK_INT >= 30) {
+                if (top) {
+                    return insets.getInsetsIgnoringVisibility(
+                            WindowInsets.Type.statusBars()
+                                    | WindowInsets.Type.displayCutout()).top;
+                }
+                return insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+            }
+            // Vor Android 11: "stable" meint die Leiste unabhängig vom Vollbild,
+            // "systemWindow" nur die gerade sichtbare.
+            return top ? insets.getStableInsetTop() : insets.getSystemWindowInsetBottom();
+        }
+        return top ? dimenPx("status_bar_height") : 0;
+    }
+
+    /** Rückfall, solange das Fenster noch keine Insets kennt. */
+    private int dimenPx(String name) {
+        int id = getResources().getIdentifier(name, "dimen", "android");
+        return id > 0 ? getResources().getDimensionPixelSize(id) : 0;
     }
 
     private void hideBars() {
@@ -96,7 +158,10 @@ public class MainActivity extends Activity {
     @Override
     public void onWindowFocusChanged(boolean focus) {
         super.onWindowFocusChanged(focus);
-        if (focus) hideBars();
+        if (focus) {
+            hideBars();
+            pushInsets();
+        }
     }
 
     /**
