@@ -3,11 +3,28 @@
 Geführte Wim-Hof-Atmung. Läuft vollständig offline, die App fordert keine
 Internet-Berechtigung an.
 
+## Aufbau
+
+Der Startbildschirm zeigt nur den Atemkreis und den Startknopf – ein Tippen
+auf den Kreis startet ebenfalls. Unten in der Mitte führt das Zahnrad zu den
+**Einstellungen**, unten rechts der Pokal zur **Statistik**: Sitzungen und
+Durchläufe insgesamt, längste Pause in der Schlussrunde, längste Pause
+überhaupt, gehaltene und geübte Zeit, Atemzüge, Übungstage und die letzten
+zwölf Sitzungen. Die Zurück-Taste des Telefons führt aus jedem Bereich zum
+Startbildschirm zurück und verlässt die App erst von dort.
+
+## Technik
+
 Die Oberfläche liegt als einzelne HTML-Datei unter
 `app/src/main/assets/index.html`. Alle Klänge werden zur Laufzeit erzeugt,
 es gibt keine Audiodateien. Die Sprachansagen laufen über die
 System-Sprachausgabe von Android (`MainActivity` → `window.AndroidTTS`),
 weil die WebView die Web Speech API nicht zuverlässig beherrscht.
+
+Einstellungen und Statistik legt die Oberfläche über `window.AndroidStore`
+in den SharedPreferences der App ab; außerhalb der App greift sie auf
+`localStorage` zurück. Gezählt wird jede Sitzung mit mindestens einem
+abgeschlossenen Durchlauf, auch eine vorzeitig beendete.
 
 ## APK bauen – Weg 1: Android Studio
 
