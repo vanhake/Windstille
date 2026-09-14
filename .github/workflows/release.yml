@@ -1,7 +1,7 @@
 name: Release veröffentlichen
 
 # Jeder Push auf main veröffentlicht eine signierte APK als GitHub-Release.
-# Die APK haengt am Release statt nur als Actions-Artefakt am Lauf: Artefakte
+# Die APK hängt am Release statt nur als Actions-Artefakt am Lauf: Artefakte
 # verfallen nach kurzer Zeit, ein Release bleibt und ist unter einer festen,
 # verlinkbaren Adresse abrufbar. Solange das Repository privat ist, setzt der
 # Download eine Anmeldung bei GitHub voraus.
