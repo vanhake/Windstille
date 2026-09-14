@@ -6,3 +6,11 @@ build/
 captures/
 .externalNativeBuild/
 .cxx/
+
+# Signaturschlüssel gehören nie ins Repo, sondern in GitHub-Secrets. Die
+# base64-Fassung ist genauso vertraulich wie der Keystore selbst.
+*.jks
+*.keystore
+*.jks.base64
+*.keystore.base64
+keystore.properties
