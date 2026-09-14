@@ -1,5 +1,20 @@
 plugins { id 'com.android.application' }
 
+// Versionsnummer. Der Release-Workflow reicht die fortlaufende Nummer seines
+// Laufs als VERSION_CODE herein, damit jede veröffentlichte APK garantiert
+// höher zählt als die vorige und ein Updater "neuer" von "gleich" unterscheiden
+// kann. Lokale Builds bleiben bei 1.
+def appVersionCode = (System.getenv("VERSION_CODE") ?: "1").toInteger()
+def appVersionName = "1.0.${appVersionCode}"
+
+// Signierung. Der Schlüssel kommt aus Umgebungsvariablen, im CI aus den
+// GitHub-Secrets; im Repo liegt er nie. Fehlt er, fällt der Release-Build auf
+// den Debug-Schlüssel zurück, damit "./gradlew assembleRelease" auch ohne
+// Keystore lokal durchläuft. Nur eine mit dem festen Schlüssel signierte APK
+// lässt sich über eine vorhandene Installation aktualisieren.
+def keystorePath = System.getenv("KEYSTORE_FILE")
+def hasKeystore = keystorePath != null && !keystorePath.isEmpty() && file(keystorePath).exists()
+
 android {
     namespace 'de.atemrunden'
     compileSdk 34
@@ -8,15 +23,25 @@ android {
         applicationId "de.atemrunden"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
+    }
+
+    signingConfigs {
+        release {
+            if (hasKeystore) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            // Ohne eigenen Schlüssel erzeugt "assembleDebug" eine sofort
-            // installierbare APK. Für eine Release-APK hier signingConfig eintragen.
+            signingConfig hasKeystore ? signingConfigs.release : signingConfigs.debug
         }
     }
 
@@ -27,3 +52,14 @@ android {
 }
 
 dependencies { }
+
+// Bricht den Build ab, statt eine mit dem Debug-Schlüssel signierte APK zu
+// veröffentlichen: die liesse sich später nicht mehr durch ein Update ersetzen.
+tasks.matching { it.name == "assembleRelease" }.configureEach {
+    doFirst {
+        if (!hasKeystore && System.getenv("CI") != null) {
+            throw new GradleException(
+                "Release-Build ohne Keystore: KEYSTORE_FILE zeigt auf keine vorhandene Datei.")
+        }
+    }
+}

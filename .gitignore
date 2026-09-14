@@ -6,3 +6,8 @@ build/
 captures/
 .externalNativeBuild/
 .cxx/
+
+# Signaturschlüssel gehören nie ins Repo, sondern in GitHub-Secrets.
+*.jks
+*.keystore
+keystore.properties
