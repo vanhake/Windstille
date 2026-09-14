@@ -1,8 +1,10 @@
 name: Release veröffentlichen
 
 # Jeder Push auf main veröffentlicht eine signierte APK als GitHub-Release.
-# Release-Dateien sind ohne Login abrufbar – Actions-Artefakte nicht. Nur so
-# kommt ein Update-Manager wie Obtainium überhaupt an die APK heran.
+# Die APK haengt am Release statt nur als Actions-Artefakt am Lauf: Artefakte
+# verfallen nach kurzer Zeit, ein Release bleibt und ist unter einer festen,
+# verlinkbaren Adresse abrufbar. Solange das Repository privat ist, setzt der
+# Download eine Anmeldung bei GitHub voraus.
 
 on:
   push:
