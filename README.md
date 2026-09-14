@@ -115,9 +115,24 @@ eine signierte Release-APK und hängt sie an ein GitHub-Release. Er lässt sich
 unter **Actions → Release veröffentlichen → Run workflow** auch von Hand
 starten.
 
-Die APK liegt danach unter **Releases** und ist ohne GitHub-Login abrufbar –
-anders als Actions-Artefakte, an die ein Update-Manager auf dem Telefon nicht
-herankäme.
+Die APK liegt danach unter **Releases**. Dieses Repository ist privat, der
+Download setzt also eine Anmeldung bei GitHub voraus – im Browser des Telefons
+ist man ohnehin angemeldet. Nur falls das Repository einmal öffentlich wird,
+sind Release-Dateien ohne Anmeldung abrufbar; Actions-Artefakte bleiben in
+jedem Fall angemeldeten Nutzern vorbehalten.
+
+### Aktualisieren
+
+Die App prüft nicht selbst auf neue Versionen. Der Weg ist:
+
+1. Unter **Releases** die neueste `Atemrunden-<Version>.apk` herunterladen.
+2. Die Datei öffnen und installieren.
+
+Weil alle Releases denselben Signaturschlüssel tragen, läuft das Update direkt
+über die vorhandene Installation – ohne Deinstallation, und die gespeicherten
+Einstellungen bleiben erhalten. Nur beim Wechsel von einer älteren Debug-APK
+auf das erste Release ist einmalig zu deinstallieren, weil sich dabei die
+Signatur ändert.
 
 ### Versionsnummern
 
