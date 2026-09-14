@@ -75,6 +75,9 @@ bereits heraus.
 
     base64 -w0 atemrunden-release.jks > atemrunden-release.jks.base64
 
+Diese Datei ist genauso vertraulich wie der Keystore – sie enthält denselben
+Schlüssel, nur als Text. Nach dem Eintragen in Schritt 3 wieder löschen.
+
 **3. Vier Secrets anlegen** unter **Settings → Secrets and variables →
 Actions → New repository secret**:
 
