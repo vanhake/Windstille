@@ -4,10 +4,11 @@ Geführte Wim-Hof-Atmung. Läuft vollständig offline, die App fordert keine
 Internet-Berechtigung an.
 
 Die Oberfläche liegt als einzelne HTML-Datei unter
-`app/src/main/assets/index.html`. Alle Klänge werden zur Laufzeit erzeugt,
-es gibt keine Audiodateien. Die Sprachansagen laufen über die
-System-Sprachausgabe von Android (`MainActivity` → `window.AndroidTTS`),
-weil die WebView die Web Speech API nicht zuverlässig beherrscht.
+`app/src/main/assets/index.html`. Atemgeräusch und Gong werden zur Laufzeit
+erzeugt. Die Sprachansagen laufen über die System-Sprachausgabe von Android
+(`MainActivity` → `window.AndroidTTS`), weil die WebView die Web Speech API
+nicht zuverlässig beherrscht – wahlweise auch über eigene Aufnahmen unter
+`app/src/main/assets/voice/`.
 
 ## APK bauen – Weg 1: Android Studio
 
@@ -46,6 +47,13 @@ Kabel:
 Es wird eine deutsche Stimme des Systems benutzt. Fehlt sie, spricht die
 Standardstimme. Nachinstallieren unter **Einstellungen → Bedienungshilfen →
 Text-in-Sprache-Ausgabe → Sprache → Deutsch**.
+
+Statt der Systemstimme kann die App auch eingesprochene Aufnahmen abspielen.
+Dazu die MP3-Dateien nach `app/src/main/assets/voice/` legen – welche das
+sind und wie sie heißen müssen, steht in
+[`docs/sprachansagen.md`](docs/sprachansagen.md). Vorhandene Aufnahmen haben
+Vorrang, für alles Übrige spricht weiterhin das System. Ohne Aufnahmen
+ändert sich nichts.
 
 ## Für den Play Store
 

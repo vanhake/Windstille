@@ -465,6 +465,7 @@ if(webTTS && !nativeTTS){
    freigeschaltet werden – sonst bleibt sie auf iOS und in eingebetteten
    Fenstern stumm. */
 function unlockTTS(){
+  primeClips();
   if(nativeTTS || !webTTS) return;
   try{
     pickVoice();
@@ -485,8 +486,90 @@ function emit(text){
   }catch(e){}
 }
 
-function say(text){
-  if(!S.voice || !hasTTS) return;
+/* ---------------------------------------------------------------
+   Eigene Sprachaufnahmen
+   Liegt zu einer Ansage eine MP3 unter assets/voice/, wird sie
+   abgespielt. Fehlt eine Datei, spricht wie bisher die Systemstimme –
+   die App bleibt also auch ohne Aufnahmen vollständig nutzbar.
+   Absichtlich über <audio> und nicht über die Web-Audio-Kette: eine
+   MediaElementSource auf eine file://-Datei bleibt in der WebView stumm.
+--------------------------------------------------------------- */
+const VOICE_DIR = 'voice/', VOICE_EXT = '.mp3';
+const CLIP_NAMES = [
+  'start-runde', 'naechste-runde', 'ausatmen-halten', 'tief-einatmen',
+  'halten', 'ausatmen-entspannen', 'sitzung-beendet'
+].concat([1,2,3,4,5,6,7,8,10,20,30,40,50].map(n => 'zahl-' + n));
+
+const voiceClips = Object.create(null);
+let clipQueue = [], clipNow = null, clipsUsed = false, clipsPrimed = false;
+
+CLIP_NAMES.forEach(name => {
+  const c = { el: null, ready: false };
+  voiceClips[name] = c;
+  try{
+    const a = new Audio(VOICE_DIR + name + VOICE_EXT);
+    a.preload = 'auto';
+    a.addEventListener('canplaythrough', () => { c.ready = true; });
+    a.addEventListener('error', () => { c.ready = false; });
+    c.el = a;
+  }catch(e){}
+});
+
+const clipsReady = names =>
+  !!names && names.length > 0 && names.every(n => voiceClips[n] && voiceClips[n].ready);
+
+/* Ein paar Ansagen bestehen aus zwei Aufnahmen ("… mit Runde" + "drei"),
+   die hier lückenlos hintereinander laufen. */
+function playClips(names, text){
+  stopClips();
+  clipQueue = names.slice();
+  playNextClip(text);
+}
+function playNextClip(text){
+  const name = clipQueue.shift();
+  if(!name){ clipNow = null; return; }
+  const a = voiceClips[name].el;
+  clipNow = a;
+  try{
+    a.muted = false;
+    a.currentTime = 0;
+    a.onended = () => playNextClip(text);
+    const p = a.play();
+    if(p && p.then) p.then(() => { ttsOk = true; clipsUsed = true; },
+                           () => { stopClips(); sayTTS(text); });
+    else { ttsOk = true; clipsUsed = true; }
+  }catch(e){ stopClips(); sayTTS(text); }
+}
+function stopClips(){
+  clipQueue = [];
+  if(clipNow){
+    try{ clipNow.onended = null; clipNow.pause(); }catch(e){}
+    clipNow = null;
+  }
+}
+/* Browser geben eine Audiodatei teils erst frei, wenn sie einmal während
+   einer echten Nutzeraktion lief – deshalb alle Aufnahmen einmal stumm
+   antippen. Eine, die inzwischen als echte Ansage läuft, bleibt in Ruhe. */
+function primeClips(){
+  if(clipsPrimed) return;
+  clipsPrimed = true;
+  CLIP_NAMES.forEach(name => {
+    const a = voiceClips[name].el;
+    if(!a) return;
+    try{
+      a.muted = true;
+      const reset = () => {
+        if(clipNow === a) return;
+        try{ a.pause(); a.currentTime = 0; a.muted = false; }catch(e){}
+      };
+      const p = a.play();
+      if(p && p.then) p.then(reset, reset); else reset();
+    }catch(e){}
+  });
+}
+
+function sayTTS(text){
+  if(!hasTTS) return;
   if(nativeTTS){
     try{ window.AndroidTTS.speak(text); ttsOk = true; }catch(e){}
     return;
@@ -502,7 +585,15 @@ function say(text){
     }
   }catch(e){}
 }
+
+/* clipNames: Aufnahmen, die denselben Satz sprechen – sonst die Systemstimme. */
+function say(text, clipNames){
+  if(!S.voice) return;
+  if(clipsReady(clipNames)){ playClips(clipNames, text); return; }
+  sayTTS(text);
+}
 function shutUp(){
+  stopClips();
   if(nativeTTS){ try{ window.AndroidTTS.stop(); }catch(e){} return; }
   if(webTTS){ try{ speechSynthesis.cancel(); }catch(e){} }
 }
@@ -552,7 +643,8 @@ function go(p){
       el.phase.textContent = 'Mach es dir bequem';
       el.cue.textContent = 'Sitzend oder liegend. Augen zu.';
       el.mRight.style.visibility = 'hidden';
-      say('Setz oder leg dich hin. Wir beginnen mit Runde ' + round + '.');
+      say('Setz oder leg dich hin. Wir beginnen mit Runde ' + round + '.',
+          ['start-runde', 'zahl-' + round]);
       break;
 
     case P.IN:
@@ -564,7 +656,8 @@ function go(p){
       el.cue.textContent = 'Tief in den Bauch, dann in die Brust';
       if(breathNo === 1){ bell(329.6, 1.6, 0.30); bell(493.9, 1.8, 0.26, 0.22); }
       breathSound('in', dur);
-      if(breathNo % 10 === 0 && breathNo !== S.breaths) say(String(breathNo));
+      if(breathNo % 10 === 0 && breathNo !== S.breaths)
+        say(String(breathNo), ['zahl-' + breathNo]);
       if(breathNo === S.breaths){ tick(0, .09); tick(0.16, .09); }
       break;
 
@@ -584,7 +677,7 @@ function go(p){
         : 'Leere Lunge. Zum Weitermachen irgendwo tippen.';
       el.mRight.style.visibility = 'hidden';
       bell(146.8, 3.4, 0.4);
-      say('Alles ausatmen und halten.');
+      say('Alles ausatmen und halten.', ['ausatmen-halten']);
       if(S.mode === 'manual') el.tap.classList.add('on');
       break;
 
@@ -596,14 +689,14 @@ function go(p){
       el.cue.textContent = 'Einmal voll auffüllen';
       bell(261.6, 2.6, 0.4);
       breathSound('in', dur);
-      say('Tief einatmen.');
+      say('Tief einatmen.', ['tief-einatmen']);
       break;
 
     case P.REC_HOLD:
       dur = S.recovery;
       el.phase.textContent = 'Halten';
       el.cue.textContent = 'Voll, aber entspannt. Kinn leicht zur Brust.';
-      say('Halten.');
+      say('Halten.', ['halten']);
       break;
 
     case P.REC_OUT:
@@ -612,7 +705,7 @@ function go(p){
       el.cue.textContent = 'Langsam entspannen';
       bell(196, 3, 0.35);
       breathSound('out', dur);
-      say('Ausatmen und entspannen.');
+      say('Ausatmen und entspannen.', ['ausatmen-entspannen']);
       break;
 
     case P.REST:
@@ -621,7 +714,8 @@ function go(p){
       el.cue.textContent = 'Kurz nachspüren, dann geht es weiter';
       el.mRound.textContent = round;
       bell(220, 2.4, 0.26);
-      say('Gleich beginnt Runde ' + (round+1) + '.');
+      say('Gleich beginnt Runde ' + (round+1) + '.',
+          ['naechste-runde', 'zahl-' + (round+1)]);
       break;
   }
 }
@@ -737,7 +831,7 @@ function frame(){
 --------------------------------------------------------------- */
 async function start(){
   audioInit();
-  ttsOk = false;
+  ttsOk = false; clipsUsed = false;
   unlockTTS();
   startKeepAlive();
 
@@ -799,7 +893,7 @@ function finish(){
   bell(261.6, 3.2, 0.38, 0);
   bell(329.6, 3.4, 0.32, 0.5);
   bell(392.0, 4.0, 0.3, 1.0);
-  say('Sitzung beendet. Gut gemacht.');
+  say('Sitzung beendet. Gut gemacht.', ['sitzung-beendet']);
   const list = $('#resultList');
   list.innerHTML = results.map(r =>
     `<div class="result"><span>Runde ${r.round}</span><span>${fmt(r.hold)} gehalten</span></div>`
@@ -812,16 +906,19 @@ $('#startBtn').addEventListener('click', start);
 
 $('#voiceTest').addEventListener('click', ()=>{
   const hint = $('#voiceHint');
-  if(!hasTTS){ hint.textContent = 'Dieser Browser kann nicht sprechen'; return; }
+  if(!hasTTS && !clipsReady(['ausatmen-halten'])){
+    hint.textContent = 'Dieser Browser kann nicht sprechen'; return;
+  }
   if(!S.voice){ S.voice = true; save(); renderSetup(); }
-  ttsOk = false;
+  ttsOk = false; clipsUsed = false;
   unlockTTS();
-  say('Alles ausatmen und halten.');
+  say('Alles ausatmen und halten.', ['ausatmen-halten']);
   hint.textContent = 'Teste …';
   setTimeout(()=>{
-    hint.textContent = ttsOk
-      ? 'Läuft – ' + (deVoice ? deVoice.name : 'Standardstimme')
-      : 'Nichts gehört? Datei direkt im Browser öffnen und Systemlautstärke prüfen.';
+    hint.textContent = !ttsOk
+      ? 'Nichts gehört? Datei direkt im Browser öffnen und Systemlautstärke prüfen.'
+      : clipsUsed ? 'Läuft – eigene Aufnahme'
+      : 'Läuft – ' + (deVoice ? deVoice.name : 'Standardstimme');
   }, 2200);
 });
 $('#againBtn').addEventListener('click', ()=>{ el.done.classList.remove('on'); el.setup.classList.remove('hidden'); renderSetup(); });
