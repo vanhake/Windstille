@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#06131c">
+<title>Atemrunden – geführte Wim-Hof-Atmung</title>
+<style>
+  :root{
+    --deep:#06131c;
+    --deep2:#0b2130;
+    --ice:#7fd8dd;
+    --ice-dim:#3d7b87;
+    --ember:#e9a24a;
+    --ember-dim:#8a5f2c;
+    --paper:#dfeef2;
+    --muted:#7e9aa4;
+    --line:rgba(127,216,221,.18);
+    --accent:var(--ice);
+    --accent-dim:var(--ice-dim);
+    --glow:rgba(127,216,221,.20);
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --sans:ui-sans-serif,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;background:
+      radial-gradient(120% 80% at 50% -10%, #0e2c3d 0%, var(--deep) 62%),
+      var(--deep);
+    color:var(--paper);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    transition:background 1.2s ease;
+  }
+  body.warm{
+    background:
+      radial-gradient(120% 80% at 50% -10%, #3a2513 0%, #150d06 62%),
+      #150d06;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:28px 22px 40px;min-height:100%;
+    padding-bottom:calc(40px + env(safe-area-inset-bottom));}
+
+  /* ---------- Startbildschirm ---------- */
+  h1{font-family:var(--serif);font-weight:400;font-size:2rem;line-height:1.15;margin:.2em 0 .15em;letter-spacing:.01em}
+  .lede{color:var(--muted);font-size:.95rem;line-height:1.6;margin:0 0 30px;max-width:44ch}
+
+  .row{display:flex;align-items:center;justify-content:space-between;gap:16px;
+       padding:15px 0;border-bottom:1px solid var(--line)}
+  .row:first-of-type{border-top:1px solid var(--line)}
+  .row .label{font-size:.95rem}
+  .row .hint{display:block;color:var(--muted);font-size:.8rem;margin-top:3px;line-height:1.4}
+
+  .stepper{display:flex;align-items:center;gap:2px;flex:none}
+  .stepper button{
+    width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+    background:transparent;color:var(--paper);font-size:1.25rem;line-height:1;
+    cursor:pointer;transition:background .15s,border-color .15s;
+  }
+  .stepper button:hover{background:rgba(127,216,221,.08);border-color:var(--accent-dim)}
+  .stepper button:active{background:rgba(127,216,221,.16)}
+  .stepper .val{min-width:74px;text-align:center;font-size:1.15rem;
+    font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+  .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+  .seg button{background:transparent;border:0;color:var(--muted);padding:9px 15px;
+    font-size:.85rem;font-family:inherit;cursor:pointer}
+  .seg button[aria-pressed="true"]{background:rgba(127,216,221,.14);color:var(--paper)}
+
+  .switch{width:52px;height:31px;border-radius:999px;border:1px solid var(--line);
+    background:transparent;position:relative;cursor:pointer;flex:none;transition:background .2s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;
+    background:var(--muted);transition:transform .2s,background .2s}
+  .switch[aria-pressed="true"]{background:rgba(127,216,221,.2)}
+  .switch[aria-pressed="true"]::after{transform:translateX(21px);background:var(--ice)}
+
+  .holds{padding:6px 0 2px}
+  .holds .hrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0}
+  .holds .hname{color:var(--muted);font-size:.9rem}
+
+  .start{
+    width:100%;margin-top:32px;padding:19px;border-radius:16px;border:0;
+    background:var(--ice);color:#06212a;font-family:var(--serif);font-size:1.2rem;
+    letter-spacing:.02em;cursor:pointer;transition:transform .12s,filter .2s}
+  .start:hover{filter:brightness(1.06)}
+  .start:active{transform:scale(.99)}
+
+  .safety{margin-top:22px;color:var(--muted);font-size:.8rem;line-height:1.6;
+    border-left:2px solid var(--ember-dim);padding-left:14px}
+
+  /* ---------- Sitzung ---------- */
+  #session{display:none;min-height:100dvh;flex-direction:column;align-items:center;
+    justify-content:center;gap:0;padding:24px;position:relative}
+  #session.on{display:flex}
+  .meta{position:absolute;top:calc(20px + env(safe-area-inset-top));left:0;right:0;
+    display:flex;justify-content:space-between;padding:0 24px;color:var(--muted);font-size:.85rem}
+  .meta b{font-weight:500;color:var(--paper);font-variant-numeric:tabular-nums}
+
+  .stage{position:relative;width:min(76vw,330px);aspect-ratio:1;display:grid;place-items:center;flex:none}
+  .halo{position:absolute;inset:-14%;border-radius:50%;
+    background:radial-gradient(circle,var(--glow) 0%,transparent 62%);pointer-events:none}
+  .rings{position:absolute;inset:0;display:grid;place-items:center;will-change:transform}
+  .ring{position:absolute;border-radius:50%;border:1px solid var(--accent-dim);opacity:.5}
+  .ring.r1{inset:2%;opacity:.85;border-color:var(--accent)}
+  .ring.r2{inset:14%;opacity:.35}
+  .ring.r3{inset:27%;opacity:.18}
+  .ring.core{inset:36%;border:0;background:radial-gradient(circle,var(--glow),transparent 70%)}
+  .arc{position:absolute;inset:-16px;transform:rotate(-90deg)}
+  .arc circle{fill:none;stroke-width:2;stroke-linecap:round}
+  .arc .track{stroke:rgba(255,255,255,.06)}
+  .arc .prog{stroke:var(--accent);transition:stroke .6s}
+  .center{position:relative;text-align:center;line-height:1}
+  .big{font-family:var(--serif);font-size:3.6rem;font-variant-numeric:tabular-nums;
+    letter-spacing:.01em}
+  .sub{color:var(--muted);font-size:.85rem;margin-top:10px}
+
+  .phase{font-family:var(--serif);font-size:1.7rem;margin-top:34px;min-height:1.3em;
+    letter-spacing:.02em;text-align:center}
+  .cue{color:var(--muted);font-size:.9rem;margin-top:8px;min-height:1.4em;text-align:center;
+    line-height:1.5;max-width:30ch}
+
+  .controls{display:flex;gap:12px;margin-top:38px}
+  .ctl{padding:12px 22px;border-radius:999px;border:1px solid var(--line);background:transparent;
+    color:var(--paper);font-family:inherit;font-size:.9rem;cursor:pointer}
+  .ctl:hover{background:rgba(255,255,255,.05)}
+  .ctl.primary{border-color:var(--accent);color:var(--accent)}
+  .ctl.small{padding:9px 15px;font-size:.82rem;color:var(--muted)}
+  .ctl.small:hover{color:var(--paper)}
+
+  .taparea{position:absolute;inset:0;display:none;cursor:pointer;z-index:2}
+  .taparea.on{display:block}
+
+  /* ---------- Abschluss ---------- */
+  #done{display:none}
+  #done.on{display:block}
+  .result{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums}
+  .result:first-of-type{border-top:1px solid var(--line)}
+  .result span:first-child{color:var(--muted)}
+
+  .hidden{display:none !important}
+  @media (max-width:360px){ .big{font-size:3rem} h1{font-size:1.7rem} }
+</style>
+</head>
+<body>
+
+<!-- ============ EINSTELLUNGEN ============ -->
+<div class="wrap" id="setup">
+  <h1>Atemrunden</h1>
+  <p class="lede">Geführte Wim-Hof-Atmung mit Atemgeräusch und Klangsignalen. Einmal eingestellt, läuft alles mit geschlossenen Augen.</p>
+
+  <div class="row">
+    <div class="label">Atemzüge pro Runde
+      <span class="hint">Kräftig ein, locker loslassen</span></div>
+    <div class="stepper" data-key="breaths" data-min="10" data-max="60" data-step="1">
+      <button type="button" data-d="-1" aria-label="weniger">−</button>
+      <div class="val">30</div>
+      <button type="button" data-d="1" aria-label="mehr">+</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="label">Runden</div>
+    <div class="stepper" data-key="rounds" data-min="1" data-max="8" data-step="1">
+      <button type="button" data-d="-1" aria-label="weniger">−</button>
+      <div class="val">3</div>
+      <button type="button" data-d="1" aria-label="mehr">+</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="label">Atemtempo
+      <span class="hint" id="tempoHint">3,0 s pro Atemzug</span></div>
+    <div class="stepper" data-key="cycle" data-min="16" data-max="50" data-step="2">
+      <button type="button" data-d="-1" aria-label="langsamer">−</button>
+      <div class="val">3,0 s</div>
+      <button type="button" data-d="1" aria-label="schneller">+</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="label">Luft anhalten
+      <span class="hint" id="modeHint">Feste Zeit pro Runde</span></div>
+    <div class="seg" id="modeSeg">
+      <button type="button" data-mode="timed" aria-pressed="true">Zeit</button>
+      <button type="button" data-mode="manual" aria-pressed="false">Manuell</button>
+    </div>
+  </div>
+
+  <div class="holds" id="holdList"></div>
+
+  <div class="row">
+    <div class="label">Erholungsatem halten
+      <span class="hint">Nach dem tiefen Einatmen</span></div>
+    <div class="stepper" data-key="recovery" data-min="5" data-max="30" data-step="5">
+      <button type="button" data-d="-1" aria-label="weniger">−</button>
+      <div class="val">15 s</div>
+      <button type="button" data-d="1" aria-label="mehr">+</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="label">Atemgeräusch und Gong</div>
+    <button class="switch" type="button" data-key="sound" aria-pressed="true" aria-label="Ton"></button>
+  </div>
+
+  <div class="row">
+    <div class="label">Sprachansagen
+      <span class="hint" id="voiceHint">Runde, Halten, Einatmen</span></div>
+    <div style="display:flex;align-items:center;gap:10px;flex:none">
+      <button class="ctl small" type="button" id="voiceTest">Testen</button>
+      <button class="switch" type="button" data-key="voice" aria-pressed="true" aria-label="Sprache"></button>
+    </div>
+  </div>
+
+  <button class="start" id="startBtn">Sitzung starten</button>
+
+  <p class="safety">Nie im oder am Wasser üben, nicht beim Autofahren oder Stehen. Setz oder leg dich hin. Schwindel und Kribbeln sind normal, Schmerz ist es nicht. Bei Schwangerschaft, Herz-Kreislauf-Erkrankungen oder Epilepsie vorher ärztlich abklären.</p>
+</div>
+
+<!-- ============ SITZUNG ============ -->
+<div id="session">
+  <div class="taparea" id="tapArea" title="Tippen zum Fortfahren"></div>
+  <div class="meta">
+    <div>Runde <b id="mRound">1</b> / <b id="mRounds">3</b></div>
+    <div id="mRight">Atemzug <b id="mBreath">0</b> / <b id="mBreaths">30</b></div>
+  </div>
+
+  <div class="stage">
+    <div class="halo"></div>
+    <svg class="arc" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="track" cx="50" cy="50" r="48"></circle>
+      <circle class="prog" cx="50" cy="50" r="48" id="arcProg"
+              stroke-dasharray="301.6" stroke-dashoffset="301.6"></circle>
+    </svg>
+    <div class="rings" id="rings">
+      <div class="ring r1"></div>
+      <div class="ring r2"></div>
+      <div class="ring r3"></div>
+      <div class="ring core"></div>
+    </div>
+    <div class="center">
+      <div class="big" id="bigNum">3</div>
+      <div class="sub" id="subTxt"></div>
+    </div>
+  </div>
+
+  <div class="phase" id="phaseTxt">Mach es dir bequem</div>
+  <div class="cue" id="cueTxt">Gleich geht es los</div>
+
+  <div class="controls">
+    <button class="ctl" id="pauseBtn">Pause</button>
+    <button class="ctl" id="stopBtn">Beenden</button>
+  </div>
+</div>
+
+<!-- ============ ABSCHLUSS ============ -->
+<div class="wrap" id="done">
+  <h1>Geschafft</h1>
+  <p class="lede">Bleib noch einen Moment liegen und spür nach.</p>
+  <div id="resultList"></div>
+  <button class="start" id="againBtn">Noch eine Sitzung</button>
+</div>
+
+<script>
+"use strict";
+
+/* ---------------------------------------------------------------
+   Einstellungen
+--------------------------------------------------------------- */
+const S = {
+  breaths: 30,
+  rounds: 3,
+  cycle: 3.0,          // Sekunden pro Atemzug (ein + aus)
+  mode: 'timed',       // 'timed' | 'manual'
+  holds: [60, 90, 120, 150, 180, 180, 180, 180],
+  recovery: 15,
+  sound: true,
+  voice: true
+};
+
+const $ = s => document.querySelector(s);
+const fmt = s => {
+  s = Math.max(0, Math.round(s));
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+};
+
+/* gespeicherte Einstellungen laden (falls verfügbar) */
+(async function load(){
+  try{
+    const r = await window.storage.get('atemrunden:settings');
+    if(r && r.value) Object.assign(S, JSON.parse(r.value));
+  }catch(e){}
+  renderSetup();
+})();
+function save(){
+  try{ window.storage.set('atemrunden:settings', JSON.stringify(S)); }catch(e){}
+}
+
+/* ---------------------------------------------------------------
+   Oberfläche: Einstellungen
+--------------------------------------------------------------- */
+function renderSetup(){
+  document.querySelectorAll('.stepper').forEach(st=>{
+    const k = st.dataset.key, v = st.querySelector('.val');
+    if(k==='cycle') v.textContent = S.cycle.toFixed(1).replace('.',',') + ' s';
+    else if(k==='recovery') v.textContent = S.recovery + ' s';
+    else v.textContent = S[k];
+  });
+  $('#tempoHint').textContent =
+    S.cycle >= 4 ? 'sehr ruhig' : S.cycle >= 3 ? 'ruhig, gut für den Anfang' :
+    S.cycle >= 2.2 ? 'zügig' : 'kräftig und schnell';
+  document.querySelectorAll('#modeSeg button').forEach(b=>
+    b.setAttribute('aria-pressed', String(b.dataset.mode===S.mode)));
+  $('#modeHint').textContent = S.mode==='timed'
+    ? 'Feste Zeit pro Runde' : 'Selbst beenden – irgendwo tippen';
+  document.querySelectorAll('.switch').forEach(b=>
+    b.setAttribute('aria-pressed', String(!!S[b.dataset.key])));
+  renderHolds();
+}
+
+function renderHolds(){
+  const box = $('#holdList');
+  box.innerHTML = '';
+  if(S.mode !== 'timed'){ return; }
+  for(let i=0;i<S.rounds;i++){
+    const row = document.createElement('div');
+    row.className = 'hrow';
+    row.innerHTML = `<div class="hname">Halten nach Runde ${i+1}</div>
+      <div class="stepper" data-hold="${i}">
+        <button type="button" data-d="-1" aria-label="kürzer">−</button>
+        <div class="val">${fmt(S.holds[i])}</div>
+        <button type="button" data-d="1" aria-label="länger">+</button>
+      </div>`;
+    box.appendChild(row);
+  }
+}
+
+document.addEventListener('click', e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+
+  const st = btn.closest('.stepper');
+  if(st && btn.dataset.d){
+    const d = Number(btn.dataset.d);
+    if(st.dataset.hold !== undefined){
+      const i = Number(st.dataset.hold);
+      S.holds[i] = Math.min(600, Math.max(15, S.holds[i] + d*15));
+    }else{
+      const k = st.dataset.key;
+      const step = Number(st.dataset.step), mn = Number(st.dataset.min), mx = Number(st.dataset.max);
+      if(k === 'cycle'){
+        let raw = Math.round(S.cycle*10) - d*step;      // + = schneller
+        S.cycle = Math.min(mx, Math.max(mn, raw)) / 10;
+      }else{
+        S[k] = Math.min(mx, Math.max(mn, S[k] + d*step));
+      }
+    }
+    save(); renderSetup(); return;
+  }
+
+  if(btn.dataset.mode){ S.mode = btn.dataset.mode; save(); renderSetup(); return; }
+
+  if(btn.classList.contains('switch')){
+    S[btn.dataset.key] = !S[btn.dataset.key];
+    if(btn.dataset.key==='voice' && !S.voice) shutUp();
+    save(); renderSetup(); return;
+  }
+});
+
+/* ---------------------------------------------------------------
+   Klang
+--------------------------------------------------------------- */
+let ac = null, noise = null, bus = null;
+
+function audioInit(){
+  if(!ac){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    ac = new AC();
+    bus = ac.createGain(); bus.gain.value = 1; bus.connect(ac.destination);
+    const n = ac.sampleRate * 2;
+    noise = ac.createBuffer(1, n, ac.sampleRate);
+    const d = noise.getChannelData(0);
+    let last = 0;
+    for(let i=0;i<n;i++){ last = (last + (Math.random()*2-1)*0.35) * 0.94; d[i] = last; }
+  }
+  if(ac.state !== 'running') ac.resume();
+}
+const clock = () => ac ? ac.currentTime : performance.now()/1000;
+
+function breathSound(dir, dur){
+  if(!S.sound || !ac) return;
+  const t0 = ac.currentTime, t1 = t0 + dur;
+  const src = ac.createBufferSource(); src.buffer = noise; src.loop = true;
+  const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.0;
+  const g = ac.createGain();
+  src.connect(bp); bp.connect(g); g.connect(bus);
+  const f0 = dir==='in' ? 340 : 950, f1 = dir==='in' ? 1050 : 260;
+  bp.frequency.setValueAtTime(f0, t0);
+  bp.frequency.exponentialRampToValueAtTime(f1, t1);
+  const peak = dir==='in' ? 0.30 : 0.24;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(peak, t0 + dur*(dir==='in' ? 0.62 : 0.22));
+  g.gain.linearRampToValueAtTime(0.0001, t1);
+  src.start(t0); src.stop(t1 + 0.05);
+
+  const o = ac.createOscillator(); o.type = 'sine';
+  const og = ac.createGain();
+  o.connect(og); og.connect(bus);
+  o.frequency.setValueAtTime(dir==='in' ? 174 : 349, t0);
+  o.frequency.exponentialRampToValueAtTime(dir==='in' ? 349 : 174, t1);
+  og.gain.setValueAtTime(0.0001, t0);
+  og.gain.linearRampToValueAtTime(0.06, t0 + dur*0.35);
+  og.gain.linearRampToValueAtTime(0.0001, t1);
+  o.start(t0); o.stop(t1 + 0.05);
+}
+
+function bell(freq, dur, vol, delay){
+  if(!S.sound || !ac) return;
+  const t0 = ac.currentTime + (delay||0);
+  [[1,1],[2.01,.42],[2.98,.2],[4.2,.09]].forEach(([m,a])=>{
+    const o = ac.createOscillator(); o.type = 'sine'; o.frequency.value = freq*m;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, vol*a), t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur/(1 + (m-1)*0.5));
+    o.connect(g); g.connect(bus); o.start(t0); o.stop(t0 + dur + 0.1);
+  });
+}
+function tick(delay, vol){
+  if(!S.sound || !ac) return;
+  const t0 = ac.currentTime + (delay||0);
+  const o = ac.createOscillator(); o.type='triangle'; o.frequency.value = 880;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.12, t0+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+0.14);
+  o.connect(g); g.connect(bus); o.start(t0); o.stop(t0+0.2);
+}
+
+let deVoice = null, ttsOk = false, keepAlive = 0;
+/* In der Android-App spricht die System-Sprachausgabe über diese Brücke,
+   weil die WebView die Web Speech API meist nicht unterstützt. */
+const nativeTTS = !!(window.AndroidTTS && window.AndroidTTS.speak);
+const webTTS = 'speechSynthesis' in window
+               && typeof window.SpeechSynthesisUtterance === 'function';
+const hasTTS = nativeTTS || webTTS;
+
+function pickVoice(){
+  if(!webTTS || nativeTTS) return;
+  try{
+    const vs = speechSynthesis.getVoices() || [];
+    deVoice = vs.find(v => /^de/i.test(v.lang) && !/eSpeak/i.test(v.name))
+           || vs.find(v => /^de/i.test(v.lang))
+           || vs.find(v => v.default) || null;
+  }catch(e){}
+}
+if(webTTS && !nativeTTS){
+  pickVoice();
+  try{ speechSynthesis.addEventListener('voiceschanged', pickVoice); }
+  catch(e){ speechSynthesis.onvoiceschanged = pickVoice; }
+}
+
+/* Die Sprachausgabe muss beim ersten Mal durch eine echte Nutzeraktion
+   freigeschaltet werden – sonst bleibt sie auf iOS und in eingebetteten
+   Fenstern stumm. */
+function unlockTTS(){
+  if(nativeTTS || !webTTS) return;
+  try{
+    pickVoice();
+    const u = new SpeechSynthesisUtterance('.');
+    u.volume = 0; u.lang = 'de-DE';
+    if(deVoice) u.voice = deVoice;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function emit(text){
+  try{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE'; u.rate = 0.95; u.pitch = 0.98; u.volume = 1;
+    if(deVoice) u.voice = deVoice;
+    u.onstart = () => { ttsOk = true; };
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function say(text){
+  if(!S.voice || !hasTTS) return;
+  if(nativeTTS){
+    try{ window.AndroidTTS.speak(text); ttsOk = true; }catch(e){}
+    return;
+  }
+  try{
+    /* cancel() direkt vor speak() verschluckt in Chrome die Ansage –
+       deshalb nur abbrechen, wenn wirklich etwas läuft, und kurz warten. */
+    if(speechSynthesis.speaking || speechSynthesis.pending){
+      speechSynthesis.cancel();
+      setTimeout(() => emit(text), 90);
+    }else{
+      emit(text);
+    }
+  }catch(e){}
+}
+function shutUp(){
+  if(nativeTTS){ try{ window.AndroidTTS.stop(); }catch(e){} return; }
+  if(webTTS){ try{ speechSynthesis.cancel(); }catch(e){} }
+}
+
+/* Chrome legt die Sprachausgabe nach längeren Pausen schlafen. */
+function startKeepAlive(){
+  if(nativeTTS || !webTTS || keepAlive) return;
+  keepAlive = setInterval(()=>{
+    try{ if(!speechSynthesis.speaking) speechSynthesis.resume(); }catch(e){}
+  }, 5000);
+}
+function stopKeepAlive(){ clearInterval(keepAlive); keepAlive = 0; }
+
+/* ---------------------------------------------------------------
+   Ablauf
+--------------------------------------------------------------- */
+const P = { PREP:'prep', IN:'in', OUT:'out', HOLD:'hold',
+            REC_IN:'rec_in', REC_HOLD:'rec_hold', REC_OUT:'rec_out', REST:'rest' };
+
+let run = false, paused = false, phase = null, t0 = 0, dur = 0;
+let round = 1, breathNo = 0, results = [], wake = null, raf = 0;
+
+const el = {
+  setup:$('#setup'), session:$('#session'), done:$('#done'),
+  rings:$('#rings'), arc:$('#arcProg'), big:$('#bigNum'), sub:$('#subTxt'),
+  phase:$('#phaseTxt'), cue:$('#cueTxt'), mRound:$('#mRound'), mRounds:$('#mRounds'),
+  mBreath:$('#mBreath'), mBreaths:$('#mBreaths'), mRight:$('#mRight'),
+  tap:$('#tapArea'), pause:$('#pauseBtn')
+};
+const CIRC = 2 * Math.PI * 48;
+
+function setAccent(warm){
+  document.body.classList.toggle('warm', warm);
+  document.documentElement.style.setProperty('--accent', warm ? 'var(--ember)' : 'var(--ice)');
+  document.documentElement.style.setProperty('--accent-dim', warm ? 'var(--ember-dim)' : 'var(--ice-dim)');
+  document.documentElement.style.setProperty('--glow', warm ? 'rgba(233,162,74,.20)' : 'rgba(127,216,221,.20)');
+}
+
+function go(p){
+  phase = p; t0 = clock();
+  const inDur = S.cycle * 0.52, outDur = S.cycle * 0.48;
+
+  switch(p){
+    case P.PREP:
+      dur = 6;
+      setAccent(false);
+      el.phase.textContent = 'Mach es dir bequem';
+      el.cue.textContent = 'Sitzend oder liegend. Augen zu.';
+      el.mRight.style.visibility = 'hidden';
+      say('Setz oder leg dich hin. Wir beginnen mit Runde ' + round + '.');
+      break;
+
+    case P.IN:
+      breathNo++;
+      dur = inDur;
+      el.mRight.style.visibility = 'visible';
+      el.mBreath.textContent = breathNo;
+      el.phase.textContent = 'Einatmen';
+      el.cue.textContent = 'Tief in den Bauch, dann in die Brust';
+      if(breathNo === 1){ bell(329.6, 1.6, 0.30); bell(493.9, 1.8, 0.26, 0.22); }
+      breathSound('in', dur);
+      if(breathNo % 10 === 0 && breathNo !== S.breaths) say(String(breathNo));
+      if(breathNo === S.breaths){ tick(0, .09); tick(0.16, .09); }
+      break;
+
+    case P.OUT:
+      dur = outDur;
+      el.phase.textContent = 'Loslassen';
+      el.cue.textContent = 'Nicht ausdrücken – einfach fallen lassen';
+      breathSound('out', dur);
+      break;
+
+    case P.HOLD:
+      setAccent(true);
+      dur = S.mode === 'timed' ? S.holds[round-1] : Infinity;
+      el.phase.textContent = 'Luft anhalten';
+      el.cue.textContent = S.mode === 'timed'
+        ? 'Leere Lunge. Ruhig bleiben.'
+        : 'Leere Lunge. Zum Weitermachen irgendwo tippen.';
+      el.mRight.style.visibility = 'hidden';
+      bell(146.8, 3.4, 0.4);
+      say('Alles ausatmen und halten.');
+      if(S.mode === 'manual') el.tap.classList.add('on');
+      break;
+
+    case P.REC_IN:
+      el.tap.classList.remove('on');
+      dur = 3.4;
+      setAccent(false);
+      el.phase.textContent = 'Tief einatmen';
+      el.cue.textContent = 'Einmal voll auffüllen';
+      bell(261.6, 2.6, 0.4);
+      breathSound('in', dur);
+      say('Tief einatmen.');
+      break;
+
+    case P.REC_HOLD:
+      dur = S.recovery;
+      el.phase.textContent = 'Halten';
+      el.cue.textContent = 'Voll, aber entspannt. Kinn leicht zur Brust.';
+      say('Halten.');
+      break;
+
+    case P.REC_OUT:
+      dur = 4;
+      el.phase.textContent = 'Ausatmen';
+      el.cue.textContent = 'Langsam entspannen';
+      bell(196, 3, 0.35);
+      breathSound('out', dur);
+      say('Ausatmen und entspannen.');
+      break;
+
+    case P.REST:
+      dur = 8;
+      el.phase.textContent = 'Runde ' + round + ' geschafft';
+      el.cue.textContent = 'Kurz nachspüren, dann geht es weiter';
+      el.mRound.textContent = round;
+      bell(220, 2.4, 0.26);
+      say('Gleich beginnt Runde ' + (round+1) + '.');
+      break;
+  }
+}
+
+function next(){
+  switch(phase){
+    case P.PREP: breathNo = 0; go(P.IN); break;
+    case P.IN:   go(P.OUT); break;
+    case P.OUT:  breathNo >= S.breaths ? go(P.HOLD) : go(P.IN); break;
+    case P.HOLD:
+      results.push({ round, hold: clock() - t0 });
+      go(P.REC_IN); break;
+    case P.REC_IN:   go(P.REC_HOLD); break;
+    case P.REC_HOLD: go(P.REC_OUT); break;
+    case P.REC_OUT:
+      if(round >= S.rounds){ finish(); }
+      else { go(P.REST); }
+      break;
+    case P.REST: round++; el.mRound.textContent = round; breathNo = 0; go(P.IN); break;
+  }
+}
+
+const ease = x => x < .5 ? 2*x*x : 1 - Math.pow(-2*x+2, 2)/2;
+
+let lastTickSec = -1;
+function frame(){
+  if(!run) return;
+  raf = requestAnimationFrame(frame);
+  const t = clock() - t0;
+  const p = dur === Infinity ? 0 : Math.min(1, t / dur);
+  let scale = 0.52, arc = 0;
+
+  switch(phase){
+    case P.PREP: {
+      const left = Math.ceil(dur - t);
+      el.big.textContent = left;
+      el.sub.textContent = 'Runde ' + round;
+      scale = 0.52 + 0.04 * Math.sin(t * 1.2);
+      arc = 1 - p;
+      if(left <= 3 && left !== lastTickSec && left > 0){ lastTickSec = left; tick(0,.1); }
+      break;
+    }
+    case P.IN:
+      scale = 0.52 + 0.48 * ease(p);
+      el.big.textContent = breathNo;
+      el.sub.textContent = 'von ' + S.breaths;
+      arc = breathNo / S.breaths;
+      break;
+    case P.OUT:
+      scale = 1.0 - 0.48 * ease(p);
+      el.big.textContent = breathNo;
+      el.sub.textContent = 'von ' + S.breaths;
+      arc = breathNo / S.breaths;
+      break;
+    case P.HOLD: {
+      scale = 0.50 + 0.025 * Math.sin(t * 0.9);
+      if(dur === Infinity){
+        el.big.textContent = fmt(t);
+        el.sub.textContent = 'tippen zum Weitermachen';
+        arc = (t % 60) / 60;
+      }else{
+        const left = dur - t;
+        el.big.textContent = fmt(left);
+        el.sub.textContent = 'anhalten';
+        arc = 1 - p;
+        const l = Math.ceil(left);
+        if(l <= 3 && l !== lastTickSec && l > 0){ lastTickSec = l; tick(0,.12); }
+      }
+      break;
+    }
+    case P.REC_IN:
+      scale = 0.52 + 0.48 * ease(p);
+      el.big.textContent = '↑';
+      el.sub.textContent = 'einatmen';
+      arc = p;
+      break;
+    case P.REC_HOLD: {
+      const left = dur - t;
+      scale = 1.0 + 0.015 * Math.sin(t*1.1);
+      el.big.textContent = Math.ceil(left);
+      el.sub.textContent = 'halten';
+      arc = 1 - p;
+      const l = Math.ceil(left);
+      if(l <= 3 && l !== lastTickSec && l > 0){ lastTickSec = l; tick(0,.1); }
+      break;
+    }
+    case P.REC_OUT:
+      scale = 1.0 - 0.48 * ease(p);
+      el.big.textContent = '↓';
+      el.sub.textContent = 'ausatmen';
+      arc = 1 - p;
+      break;
+    case P.REST: {
+      const left = dur - t;
+      scale = 0.52 + 0.03 * Math.sin(t*0.8);
+      el.big.textContent = Math.ceil(left);
+      el.sub.textContent = 'bis Runde ' + (round + 1);
+      arc = 1 - p;
+      const l = Math.ceil(left);
+      if(l <= 3 && l !== lastTickSec && l > 0){ lastTickSec = l; tick(0,.11); }
+      break;
+    }
+  }
+
+  el.rings.style.transform = 'scale(' + scale.toFixed(4) + ')';
+  el.arc.style.strokeDashoffset = (CIRC * (1 - Math.max(0, Math.min(1, arc)))).toFixed(2);
+
+  if(dur !== Infinity && t >= dur){ lastTickSec = -1; next(); }
+}
+
+/* ---------------------------------------------------------------
+   Steuerung
+--------------------------------------------------------------- */
+async function start(){
+  audioInit();
+  ttsOk = false;
+  unlockTTS();
+  startKeepAlive();
+
+  run = true; paused = false; round = 1; breathNo = 0; results = [];
+  el.mRounds.textContent = S.rounds;
+  el.mBreaths.textContent = S.breaths;
+  el.mRound.textContent = 1;
+  el.pause.textContent = 'Pause';
+
+  el.setup.classList.add('hidden');
+  el.done.classList.remove('on');
+  el.session.classList.add('on');
+
+  try{ wake = await navigator.wakeLock.request('screen'); }catch(e){}
+
+  go(P.PREP);
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(frame);
+
+  setTimeout(()=>{
+    if(run && S.voice && !ttsOk && phase === P.PREP){
+      el.cue.textContent = 'Sprachausgabe blockiert – die Klangsignale führen dich trotzdem durch.';
+    }
+  }, 2600);
+}
+
+function togglePause(){
+  if(!run) return;
+  paused = !paused;
+  el.pause.textContent = paused ? 'Weiter' : 'Pause';
+  shutUp();
+  if(paused){
+    el.phase.dataset.prev = el.phase.textContent;
+    el.phase.textContent = 'Pause';
+    if(ac) ac.suspend();
+    cancelAnimationFrame(raf);
+  }else{
+    el.phase.textContent = el.phase.dataset.prev || '';
+    if(ac) ac.resume().then(()=>{ raf = requestAnimationFrame(frame); });
+    else raf = requestAnimationFrame(frame);
+  }
+}
+
+function stop(toSetup){
+  run = false; paused = false;
+  cancelAnimationFrame(raf);
+  stopKeepAlive();
+  el.tap.classList.remove('on');
+  shutUp();
+  if(ac && ac.state === 'suspended') ac.resume();
+  try{ if(wake) wake.release(); }catch(e){}
+  wake = null;
+  setAccent(false);
+  el.session.classList.remove('on');
+  if(toSetup){ el.setup.classList.remove('hidden'); renderSetup(); }
+}
+
+function finish(){
+  bell(261.6, 3.2, 0.38, 0);
+  bell(329.6, 3.4, 0.32, 0.5);
+  bell(392.0, 4.0, 0.3, 1.0);
+  say('Sitzung beendet. Gut gemacht.');
+  const list = $('#resultList');
+  list.innerHTML = results.map(r =>
+    `<div class="result"><span>Runde ${r.round}</span><span>${fmt(r.hold)} gehalten</span></div>`
+  ).join('');
+  stop(false);
+  el.done.classList.add('on');
+}
+
+$('#startBtn').addEventListener('click', start);
+
+$('#voiceTest').addEventListener('click', ()=>{
+  const hint = $('#voiceHint');
+  if(!hasTTS){ hint.textContent = 'Dieser Browser kann nicht sprechen'; return; }
+  if(!S.voice){ S.voice = true; save(); renderSetup(); }
+  ttsOk = false;
+  unlockTTS();
+  say('Alles ausatmen und halten.');
+  hint.textContent = 'Teste …';
+  setTimeout(()=>{
+    hint.textContent = ttsOk
+      ? 'Läuft – ' + (deVoice ? deVoice.name : 'Standardstimme')
+      : 'Nichts gehört? Datei direkt im Browser öffnen und Systemlautstärke prüfen.';
+  }, 2200);
+});
+$('#againBtn').addEventListener('click', ()=>{ el.done.classList.remove('on'); el.setup.classList.remove('hidden'); renderSetup(); });
+$('#pauseBtn').addEventListener('click', togglePause);
+$('#stopBtn').addEventListener('click', ()=>stop(true));
+el.tap.addEventListener('click', ()=>{ if(phase === P.HOLD && !paused) next(); });
+
+document.addEventListener('keydown', e=>{
+  if(!run) return;
+  if(e.code === 'Space'){ e.preventDefault();
+    if(phase === P.HOLD && S.mode === 'manual' && !paused) next(); else togglePause(); }
+  if(e.code === 'Escape') stop(true);
+});
+
+document.addEventListener('visibilitychange', async ()=>{
+  if(document.visibilityState === 'visible' && run && !paused){
+    try{ if(ac) await ac.resume(); }catch(e){}
+    try{ if(!wake) wake = await navigator.wakeLock.request('screen'); }catch(e){}
+  }
+});
+</script>
+</body>
+</html>
