@@ -16,11 +16,11 @@ def keystorePath = System.getenv("KEYSTORE_FILE")
 def hasKeystore = keystorePath != null && !keystorePath.isEmpty() && file(keystorePath).exists()
 
 android {
-    namespace 'de.atemrunden'
+    namespace 'de.windstille'
     compileSdk 34
 
     defaultConfig {
-        applicationId "de.atemrunden"
+        applicationId "de.windstille"
         minSdk 24
         targetSdk 34
         versionCode appVersionCode

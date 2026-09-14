@@ -1,4 +1,4 @@
-package de.atemrunden;
+package de.windstille;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -28,7 +28,7 @@ import java.util.Locale;
  */
 public class MainActivity extends Activity {
 
-    private static final String PREFS = "atemrunden";
+    private static final String PREFS = "windstille";
 
     private WebView web;
     private TextToSpeech tts;
