@@ -172,9 +172,9 @@
     <div class="label">Atemtempo
       <span class="hint" id="tempoHint">3,0 s pro Atemzug</span></div>
     <div class="stepper" data-key="cycle" data-min="16" data-max="50" data-step="2">
-      <button type="button" data-d="-1" aria-label="langsamer">−</button>
+      <button type="button" data-d="-1" aria-label="schneller">−</button>
       <div class="val">3,0 s</div>
-      <button type="button" data-d="1" aria-label="schneller">+</button>
+      <button type="button" data-d="1" aria-label="langsamer">+</button>
     </div>
   </div>
 
@@ -350,7 +350,7 @@ document.addEventListener('click', e=>{
       const k = st.dataset.key;
       const step = Number(st.dataset.step), mn = Number(st.dataset.min), mx = Number(st.dataset.max);
       if(k === 'cycle'){
-        let raw = Math.round(S.cycle*10) - d*step;      // + = schneller
+        let raw = Math.round(S.cycle*10) + d*step;      // + = längere Atemdauer
         S.cycle = Math.min(mx, Math.max(mn, raw)) / 10;
       }else{
         S[k] = Math.min(mx, Math.max(mn, S[k] + d*step));
