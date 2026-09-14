@@ -1,6 +1,7 @@
 package de.atemrunden;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.os.Build;
@@ -21,12 +22,17 @@ import java.util.Locale;
  * Zeigt die Atem-App als lokale Web-Oberfläche und stellt ihr die
  * System-Sprachausgabe zur Verfügung. Die WebView selbst kann die
  * Web Speech API nicht, deshalb die Brücke window.AndroidTTS.
+ * Einstellungen und Statistik legt die Oberfläche über window.AndroidStore
+ * in den SharedPreferences ab, damit sie ein Neustart überlebt.
  */
 public class MainActivity extends Activity {
+
+    private static final String PREFS = "atemrunden";
 
     private WebView web;
     private TextToSpeech tts;
     private boolean ttsReady = false;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -58,6 +64,8 @@ public class MainActivity extends Activity {
             }
         });
 
+        prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+
         web = new WebView(this);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -68,6 +76,7 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient());
         web.setBackgroundColor(0xFF06131C);
         web.addJavascriptInterface(new TtsBridge(), "AndroidTTS");
+        web.addJavascriptInterface(new StoreBridge(), "AndroidStore");
 
         setContentView(web);
         hideBars();
@@ -88,6 +97,23 @@ public class MainActivity extends Activity {
     public void onWindowFocusChanged(boolean focus) {
         super.onWindowFocusChanged(focus);
         if (focus) hideBars();
+    }
+
+    /**
+     * Die Zurück-Taste navigiert erst innerhalb der Oberfläche
+     * (Sitzung → Start, Einstellungen oder Statistik → Start).
+     * Nur auf dem Startbildschirm verlässt sie die App.
+     */
+    @Override
+    public void onBackPressed() {
+        if (web == null) {
+            super.onBackPressed();
+            return;
+        }
+        web.evaluateJavascript("(window.atemBack && window.atemBack()) === true",
+                value -> {
+                    if (!"true".equals(value)) MainActivity.super.onBackPressed();
+                });
     }
 
     /** Von der Web-Oberfläche aufgerufen: window.AndroidTTS.speak("…") */
@@ -111,6 +137,27 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public boolean ready() {
             return ttsReady;
+        }
+    }
+
+    /** Von der Web-Oberfläche aufgerufen: window.AndroidStore.get/set("…") */
+    private class StoreBridge {
+        @JavascriptInterface
+        public String get(String key) {
+            if (key == null) return null;
+            return prefs.getString(key, null);
+        }
+
+        @JavascriptInterface
+        public void set(String key, String value) {
+            if (key == null) return;
+            prefs.edit().putString(key, value).apply();
+        }
+
+        @JavascriptInterface
+        public void remove(String key) {
+            if (key == null) return;
+            prefs.edit().remove(key).apply();
         }
     }
 
