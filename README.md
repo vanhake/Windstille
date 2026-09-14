@@ -1,7 +1,7 @@
 # Windstille – Android
 
-Geführte Wim-Hof-Atmung. Läuft vollständig offline, die App fordert keine
-Internet-Berechtigung an.
+Geführte Atemrunden mit Retention. Läuft vollständig offline, die App
+fordert keine Internet-Berechtigung an.
 
 ## Aufbau
 
