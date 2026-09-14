@@ -1,4 +1,4 @@
-# Atemrunden – Android
+# Windstille – Android
 
 Geführte Wim-Hof-Atmung. Läuft vollständig offline, die App fordert keine
 Internet-Berechtigung an.
@@ -40,7 +40,7 @@ abgeschlossenen Durchlauf, auch eine vorzeitig beendete.
 2. Der Workflow `.github/workflows/build-apk.yml` startet bei jedem Push auf
    `main`, bei Pull Requests und lässt sich unter **Actions → APK bauen →
    Run workflow** auch von Hand starten.
-3. Unter **Actions → APK bauen → Artifacts** die fertige APK (`Atemrunden-APK`)
+3. Unter **Actions → APK bauen → Artifacts** die fertige APK (`Windstille-APK`)
    herunterladen.
 
 ## APK bauen – Weg 3: Kommandozeile
@@ -79,8 +79,8 @@ einmalig einen festen Schlüssel.
 **1. Keystore erzeugen** (lokal, auf einem Rechner mit JDK):
 
     keytool -genkeypair -v \
-      -keystore atemrunden-release.jks \
-      -alias atemrunden \
+      -keystore windstille-release.jks \
+      -alias windstille \
       -keyalg RSA -keysize 4096 -validity 10000
 
 Das Passwort frei wählen und die Datei sicher aufbewahren – **ohne sie sind
@@ -90,7 +90,7 @@ bereits heraus.
 
 **2. Keystore in Text umwandeln**, damit er als Secret hinterlegt werden kann:
 
-    base64 -w0 atemrunden-release.jks > atemrunden-release.jks.base64
+    base64 -w0 windstille-release.jks > windstille-release.jks.base64
 
 Diese Datei ist genauso vertraulich wie der Keystore – sie enthält denselben
 Schlüssel, nur als Text. Nach dem Eintragen in Schritt 3 wieder löschen.
@@ -102,11 +102,15 @@ Actions → New repository secret**:
 | --- | --- |
 | `KEYSTORE_BASE64` | Inhalt der Datei aus Schritt 2 |
 | `KEYSTORE_PASSWORD` | Passwort des Keystores |
-| `KEY_ALIAS` | `atemrunden` |
+| `KEY_ALIAS` | `windstille` |
 | `KEY_PASSWORD` | Passwort des Schlüssels (bei `keytool` oben dasselbe) |
 
 Fehlt eines davon, bricht der Release-Workflow gleich im ersten Schritt mit
 einer Meldung ab, statt eine unbrauchbar signierte APK zu veröffentlichen.
+
+`KEY_ALIAS` muss zum Keystore passen, nicht zum App-Namen: Ein bereits
+angelegter Keystore behält seinen ursprünglichen Alias, das Secret bleibt dann
+unverändert. Nur ein neu erzeugter Keystore bekommt den Alias von oben.
 
 ## Releases
 
@@ -125,7 +129,7 @@ jedem Fall angemeldeten Nutzern vorbehalten.
 
 Die App prüft nicht selbst auf neue Versionen. Der Weg ist:
 
-1. Unter **Releases** die neueste `Atemrunden-<Version>.apk` herunterladen.
+1. Unter **Releases** die neueste `Windstille-<Version>.apk` herunterladen.
 2. Die Datei öffnen und installieren.
 
 Weil alle Releases denselben Signaturschlüssel tragen, läuft das Update direkt
@@ -133,6 +137,14 @@ Weil alle Releases denselben Signaturschlüssel tragen, läuft das Update direkt
 Einstellungen bleiben erhalten. Nur beim Wechsel von einer älteren Debug-APK
 auf das erste Release ist einmalig zu deinstallieren, weil sich dabei die
 Signatur ändert.
+
+Dasselbe gilt einmalig für den Wechsel von **Atemrunden** auf **Windstille**:
+Mit dem Namen hat sich der Package-Name geändert (`de.atemrunden` →
+`de.windstille`), Android hält beide deshalb für verschiedene Apps. Die alte
+Version bleibt neben der neuen stehen, bis sie von Hand entfernt wird, und
+Einstellungen wie Statistik fangen in der neuen bei null an – sie liegen im
+privaten Speicher der alten App und lassen sich nicht übernehmen. Ab dem
+ersten Windstille-Release laufen Updates wieder wie beschrieben durch.
 
 ### Versionsnummern
 
