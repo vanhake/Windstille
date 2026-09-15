@@ -5,13 +5,28 @@ fordert keine Internet-Berechtigung an.
 
 ## Aufbau
 
-Der Startbildschirm zeigt nur den Atemkreis und den Startknopf – ein Tippen
-auf den Kreis startet ebenfalls. Unten in der Mitte führt das Zahnrad zu den
-**Einstellungen**, unten rechts der Pokal zur **Statistik**: Sitzungen und
-Durchläufe insgesamt, längste Pause in der Schlussrunde, längste Pause
-überhaupt, gehaltene und geübte Zeit, Atemzüge, Übungstage und die letzten
-zwölf Sitzungen. Die Zurück-Taste des Telefons führt aus jedem Bereich zum
-Startbildschirm zurück und verlässt die App erst von dort.
+Die Oberfläche folgt der Wasserlinie: ein Pegel steigt beim Einatmen und
+fällt beim Loslassen, in der Retention steht er still und der ganze
+Bildschirm wird warm.
+
+Der Startbildschirm zeigt die Wortmarke, den Kreis mit dem Pegel und der
+gewählten Sitzung sowie den Startknopf – ein Tippen auf den Kreis startet
+ebenfalls. Darunter führt das linke Rundsymbol zu den **Einstellungen**, das
+rechte zur **Statistik**: Sitzungen und Durchläufe insgesamt, längste Pause
+in der Schlussrunde, längste Pause überhaupt, gehaltene und geübte Zeit,
+Atemzüge, Übungstage und die letzten zwölf Sitzungen als Balken. Die
+Zurück-Taste des Telefons führt aus jedem Bereich zum Startbildschirm zurück
+und verlässt die App erst von dort.
+
+Während der Sitzung stehen oben die Runden als Striche, in der Mitte der
+Atemzug oder die Haltezeit, darunter Phase und Hinweis. Beim Anhalten zeigt
+eine Marke, wie weit die laufende Pause an die bisherige Bestzeit
+heranreicht. Am Ende fasst der Abschluss die Sitzung in vier Kacheln
+zusammen – längste Pause, Unterschied zum letzten Mal, geübte Zeit,
+Atemzüge – und listet jeden Durchlauf einzeln auf.
+
+Das Startsymbol zeigt dieselbe Marke: die glatte See mit Horizont, darüber
+die ausgepustete Wolke, die nach rechts größer und heller wird.
 
 ## Technik
 

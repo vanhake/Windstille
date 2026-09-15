@@ -1,13 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Windstille: glatte See mit Horizont, darüber die ausgepustete Wolke.
+  Sie wird nach rechts größer und heller – der Atem zieht ab.
+  Die Gruppe skaliert den Ring auf 65 dp Durchmesser, damit er im
+  Sicherheitsbereich des adaptiven Symbols bleibt.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:strokeColor="#7FD8DD" android:strokeWidth="2.6" android:fillColor="#00000000"
-        android:pathData="M54,24 m-30,0 a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0" />
-    <path android:strokeColor="#7FD8DD" android:strokeWidth="1.8" android:strokeAlpha="0.55"
-        android:fillColor="#00000000"
-        android:pathData="M54,24 m-21,0 a21,21 0 1,0 42,0 a21,21 0 1,0 -42,0" />
-    <path android:strokeColor="#E9A24A" android:strokeWidth="1.4" android:strokeAlpha="0.85"
-        android:fillColor="#00000000"
-        android:pathData="M54,24 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0" />
+
+    <group android:pivotX="54" android:pivotY="54"
+        android:scaleX="0.95" android:scaleY="0.95">
+
+        <group>
+            <clip-path android:pathData="M54,54 m-34,0 a34,34 0 1,0 68,0 a34,34 0 1,0 -68,0" />
+
+            <!-- Wasser unter dem Horizont -->
+            <path android:fillColor="#7FD8DD" android:fillAlpha="0.15"
+                android:pathData="M18,54 L90,54 L90,90 L18,90 Z" />
+            <!-- Horizont -->
+            <path android:strokeColor="#E9A24A" android:strokeWidth="2.2"
+                android:fillColor="#00000000" android:pathData="M18,54 L90,54" />
+
+            <!-- kleinster Puff, ganz links, fast verweht -->
+            <path android:fillColor="#7FD8DD" android:fillAlpha="0.45"
+                android:pathData="M31,45 m-2.7,0 a2.7,2.7 0 1,0 5.4,0 a2.7,2.7 0 1,0 -5.4,0" />
+            <!-- mittlere Puffs -->
+            <path android:fillColor="#7FD8DD" android:fillAlpha="0.72"
+                android:pathData="M45,41 m-4.4,0 a4.4,4.4 0 1,0 8.8,0 a4.4,4.4 0 1,0 -8.8,0
+                                  M50,43.2 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
+            <!-- die große Wolke rechts -->
+            <path android:fillColor="#7FD8DD"
+                android:pathData="M66,34.5 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0
+                                  M73.5,38 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0
+                                  M59.5,38.5 m-4.6,0 a4.6,4.6 0 1,0 9.2,0 a4.6,4.6 0 1,0 -9.2,0" />
+        </group>
+
+        <path android:strokeColor="#7FD8DD" android:strokeWidth="2.4"
+            android:fillColor="#00000000"
+            android:pathData="M54,54 m-34,0 a34,34 0 1,0 68,0 a34,34 0 1,0 -68,0" />
+    </group>
 </vector>

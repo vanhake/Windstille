@@ -8,224 +8,259 @@
 <style>
   :root{
     --deep:#06131c;
-    --deep2:#0b2130;
+    --deep2:#0e2c3d;
     --ice:#7fd8dd;
+    --ice-hi:#9ee6ea;
     --ice-dim:#3d7b87;
     --ember:#e9a24a;
-    --ember-dim:#8a5f2c;
+    --ember-dim:#b08a55;
+    --warm:#150d06;
     --paper:#dfeef2;
+    --soft:#9fc0c8;
     --muted:#7e9aa4;
-    --line:rgba(127,216,221,.18);
+    --line:rgba(127,216,221,.16);
+    --line-strong:rgba(127,216,221,.24);
     --accent:var(--ice);
-    --accent-dim:var(--ice-dim);
-    --glow:rgba(127,216,221,.20);
+    --on-accent:#06212a;
+    /* Wasserlinie: Füllung und Kante des Pegels */
+    --tide-top:rgba(127,216,221,.22);
+    --tide-bottom:rgba(127,216,221,.05);
+    --tide-line:rgba(127,216,221,.65);
     /* Platz für Status- und Navigationsleiste. Die App setzt die Werte
        beim Start über die Android-Brücke auf die echten Höhen; ohne sie
        bleibt der Ausschnitt-Wert des Browsers als Rückfall. */
     --safe-top:env(safe-area-inset-top, 0px);
     --safe-bottom:env(safe-area-inset-bottom, 0px);
-    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,'Noto Serif',serif;
     --sans:ui-sans-serif,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
   body{
     margin:0;background:
-      radial-gradient(120% 80% at 50% -10%, #0e2c3d 0%, var(--deep) 62%),
+      radial-gradient(120% 80% at 50% -10%, var(--deep2) 0%, var(--deep) 62%),
       var(--deep);
     color:var(--paper);font-family:var(--sans);
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
-    transition:background 1.2s ease;
+    transition:background 1.2s ease,color 1.2s ease;
   }
+  /* Retention: der ganze Bildschirm wird warm */
   body.warm{
     background:
-      radial-gradient(120% 80% at 50% -10%, #3a2513 0%, #150d06 62%),
-      #150d06;
+      radial-gradient(120% 80% at 50% -10%, #3a2513 0%, var(--warm) 62%),
+      var(--warm);
+    color:#f3e3cf;
+    --paper:#f3e3cf;
+    --soft:#d8b98c;
+    --muted:#b08a55;
+    --line:rgba(233,162,74,.22);
+    --line-strong:rgba(233,162,74,.30);
+    --accent:var(--ember);
+    --on-accent:#2a1705;
+    --tide-top:rgba(233,162,74,.18);
+    --tide-bottom:rgba(233,162,74,.03);
+    --tide-line:rgba(233,162,74,.55);
   }
+
   .wrap{max-width:560px;margin:0 auto;min-height:100%;
-    padding:calc(28px + var(--safe-top)) 22px calc(40px + var(--safe-bottom));}
+    padding:calc(22px + var(--safe-top)) 24px calc(34px + var(--safe-bottom));}
 
-  /* ---------- Startbildschirm ---------- */
-  .home{display:flex;flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;min-height:100dvh;
-    padding-bottom:calc(118px + var(--safe-bottom))}
-  .homeStage{position:relative;width:min(64vw,270px);aspect-ratio:1;display:grid;place-items:center;
-    border:0;background:transparent;padding:0;cursor:pointer;flex:none}
-  .homeStage .rings{animation:breathe 9s ease-in-out infinite}
-  @keyframes breathe{0%,100%{transform:scale(.60)}50%{transform:scale(.88)}}
-  @media (prefers-reduced-motion:reduce){.homeStage .rings{animation:none;transform:scale(.74)}}
-  .homeTitle{font-family:var(--serif);font-weight:400;font-size:1.9rem;letter-spacing:.01em;
-    margin:30px 0 6px}
-  .homeSub{color:var(--muted);font-size:.88rem;line-height:1.5;margin:0;max-width:42ch}
-  .home .start{max-width:330px}
-  .homeSafety{margin:22px 0 0;color:var(--muted);font-size:.75rem;line-height:1.5;max-width:34ch}
-
-  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:5;max-width:560px;margin:0 auto;
-    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
-    padding:12px 22px calc(16px + var(--safe-bottom))}
-  .tabbar .slotC{grid-column:2}
-  .tabbar .slotR{grid-column:3;justify-self:end}
-
-  .iconbtn{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);flex:none;
+  /* ---------- gemeinsame Bausteine ---------- */
+  .iconbtn{width:52px;height:52px;border-radius:50%;border:1px solid var(--line-strong);flex:none;
     background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;
     transition:color .15s,border-color .15s,background .15s}
-  .iconbtn:hover{color:var(--paper);border-color:var(--accent-dim);background:rgba(127,216,221,.07)}
+  .iconbtn:hover{color:var(--paper);border-color:var(--accent);background:rgba(127,216,221,.07)}
   .iconbtn:active{background:rgba(127,216,221,.16)}
-  .iconbtn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;
+  .iconbtn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.5;
     stroke-linecap:round;stroke-linejoin:round}
-  .iconbtn.plain{width:42px;height:42px;border-color:transparent}
-  .iconbtn.plain svg{width:21px;height:21px}
+  .iconbtn.small{width:40px;height:40px;color:var(--paper);border-color:var(--line-strong)}
+  .iconbtn.small svg{width:18px;height:18px;stroke-width:1.6}
 
-  .pagehead{display:flex;align-items:center;gap:10px;margin:0 0 24px}
-  .pagehead h2{font-family:var(--serif);font-weight:400;font-size:1.6rem;margin:0;letter-spacing:.01em}
-
-  /* ---------- Einstellungen ---------- */
-  h1{font-family:var(--serif);font-weight:400;font-size:2rem;line-height:1.15;margin:.2em 0 .15em;letter-spacing:.01em}
-  .lede{color:var(--muted);font-size:.95rem;line-height:1.6;margin:0 0 30px;max-width:44ch}
-
-  .row{display:flex;align-items:center;justify-content:space-between;gap:16px;
-       padding:15px 0;border-bottom:1px solid var(--line)}
-  .row:first-of-type{border-top:1px solid var(--line)}
-  .row .label{font-size:.95rem}
-  .row .hint{display:block;color:var(--muted);font-size:.8rem;margin-top:3px;line-height:1.4}
-
-  .stepper{display:flex;align-items:center;gap:2px;flex:none}
-  .stepper button{
-    width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
-    background:transparent;color:var(--paper);font-size:1.25rem;line-height:1;
-    cursor:pointer;transition:background .15s,border-color .15s;
-  }
-  .stepper button:hover{background:rgba(127,216,221,.08);border-color:var(--accent-dim)}
-  .stepper button:active{background:rgba(127,216,221,.16)}
-  .stepper .val{min-width:74px;text-align:center;font-size:1.15rem;
-    font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
-
-  .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
-  .seg button{background:transparent;border:0;color:var(--muted);padding:9px 15px;
-    font-size:.85rem;font-family:inherit;cursor:pointer}
-  .seg button[aria-pressed="true"]{background:rgba(127,216,221,.14);color:var(--paper)}
-
-  .switch{width:52px;height:31px;border-radius:999px;border:1px solid var(--line);
-    background:transparent;position:relative;cursor:pointer;flex:none;transition:background .2s}
-  .switch::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;
-    background:var(--muted);transition:transform .2s,background .2s}
-  .switch[aria-pressed="true"]{background:rgba(127,216,221,.2)}
-  .switch[aria-pressed="true"]::after{transform:translateX(21px);background:var(--ice)}
-
-  .holds{padding:6px 0 2px}
-  .holds .hrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0}
-  .holds .hname{color:var(--muted);font-size:.9rem}
+  .pagehead{display:flex;align-items:center;gap:14px;margin:0 0 24px}
+  .pagehead h2{font-family:var(--serif);font-weight:400;font-size:1.5rem;margin:0;letter-spacing:.01em}
 
   .start{
-    width:100%;margin-top:32px;padding:19px;border-radius:16px;border:0;
-    background:var(--ice);color:#06212a;font-family:var(--serif);font-size:1.2rem;
-    letter-spacing:.02em;cursor:pointer;transition:transform .12s,filter .2s}
+    width:100%;padding:19px;border-radius:16px;border:0;
+    background:var(--ice);color:#06212a;font-family:var(--serif);font-size:1.18rem;
+    letter-spacing:.02em;cursor:pointer;transition:filter .2s,transform .12s}
   .start:hover{filter:brightness(1.06)}
   .start:active{transform:scale(.99)}
 
-  .safety{margin-top:22px;color:var(--muted);font-size:.8rem;line-height:1.6;
-    border-left:2px solid var(--ember-dim);padding-left:14px}
+  .ctl{padding:12px 24px;border-radius:999px;border:1px solid var(--line-strong);
+    background:rgba(6,19,28,.5);color:var(--paper);font-family:inherit;font-size:.88rem;cursor:pointer}
+  .ctl:hover{background:rgba(255,255,255,.06)}
+  body.warm .ctl{background:rgba(21,13,6,.5)}
+  .ctl.small{padding:9px 16px;font-size:.8rem;color:var(--muted);background:transparent;
+    border-color:var(--line)}
+  .ctl.small:hover{color:var(--paper)}
+  .centerlink{display:block;margin:16px auto 0}
+
+  .label-mono{font:400 .7rem/1.4 var(--mono);color:var(--muted);letter-spacing:.1em}
+
+  /* ---------- Startbildschirm ---------- */
+  .home{display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    text-align:center;min-height:100dvh;gap:22px}
+  .brand{font-family:var(--serif);font-weight:300;font-size:1.55rem;letter-spacing:.14em;
+    margin-top:26px;color:var(--paper)}
+  .homeStage{position:relative;width:min(68vw,250px);aspect-ratio:1;border-radius:50%;
+    overflow:hidden;border:1px solid var(--line-strong);background:transparent;padding:0;
+    display:grid;place-items:center;cursor:pointer;flex:none;color:inherit}
+  .homeStage .level{position:absolute;left:-10%;right:-10%;bottom:-24%;height:62%;
+    background:linear-gradient(180deg,var(--tide-top),var(--tide-bottom));
+    border-top:1px solid rgba(127,216,221,.55);
+    animation:tide 9s ease-in-out infinite}
+  @keyframes tide{0%,100%{transform:translateY(9%)}50%{transform:translateY(-7%)}}
+  @media (prefers-reduced-motion:reduce){.homeStage .level{animation:none}}
+  .homeSummary{position:relative;font-family:var(--serif);font-weight:300;font-size:.95rem;
+    line-height:1.7;color:var(--soft)}
+  .homeFoot{width:100%;display:flex;flex-direction:column;align-items:center;gap:18px}
+  .homeSafety{margin:0;color:var(--muted);font-size:.75rem;line-height:1.5;max-width:34ch}
+  .tabbar{display:flex;gap:34px;padding-bottom:calc(4px + var(--safe-bottom))}
+
+  /* ---------- Einstellungen ---------- */
+  .row{display:flex;align-items:center;justify-content:space-between;gap:16px;
+       padding:16px 0;border-bottom:1px solid var(--line)}
+  .row:first-of-type{border-top:1px solid var(--line)}
+  .row .label{font-size:.92rem}
+  .row .hint{display:block;color:var(--muted);font-size:.74rem;margin-top:3px;line-height:1.4}
+
+  .stepper{display:flex;align-items:center;gap:10px;flex:none}
+  .stepper button{
+    width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);
+    background:transparent;color:var(--ice);font-size:1.05rem;line-height:1;
+    cursor:pointer;transition:background .15s,border-color .15s;flex:none}
+  .stepper button:hover{background:rgba(127,216,221,.08);border-color:var(--ice)}
+  .stepper button:active{background:rgba(127,216,221,.16)}
+  .stepper .val{min-width:56px;text-align:center;font-family:var(--serif);font-size:1.1rem;
+    font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+  .seg{display:flex;border:1px solid var(--line-strong);border-radius:999px;overflow:hidden;flex:none}
+  .seg button{background:transparent;border:0;color:var(--muted);padding:9px 16px;
+    font-size:.82rem;font-family:inherit;cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--ice);color:#06212a}
+
+  .switch{width:52px;height:31px;border-radius:999px;border:1px solid var(--line-strong);
+    background:transparent;position:relative;cursor:pointer;flex:none;transition:background .2s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;
+    background:var(--muted);transition:transform .2s,background .2s}
+  .switch[aria-pressed="true"]{background:rgba(127,216,221,.9);border-color:rgba(127,216,221,.9)}
+  .switch[aria-pressed="true"]::after{transform:translateX(21px);background:var(--deep)}
+
+  .holds{padding:4px 0 2px}
+  .holds .hrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 0}
+  .holds .hname{color:var(--muted);font-size:.84rem}
+
+  .safety{margin-top:22px;color:var(--muted);font-size:.76rem;line-height:1.6;
+    border-left:2px solid rgba(233,162,74,.45);padding-left:14px}
+  .foot{margin:22px 0 0;color:var(--muted);font-size:.72rem;line-height:1.6}
+
+  /* ---------- Statistik ---------- */
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{border:1px solid var(--line);border-radius:14px;padding:15px 14px}
+  .tile .num{font-family:var(--serif);font-weight:300;font-size:1.75rem;line-height:1.1;
+    font-variant-numeric:tabular-nums}
+  .tile .cap{color:var(--muted);font-size:.7rem;line-height:1.4;margin-top:5px}
+  .tile.ember{background:rgba(233,162,74,.05);border-color:rgba(233,162,74,.3)}
+  .tile.ember .num{color:var(--ember)}
+  .tile.ember .cap{color:var(--ember-dim)}
+
+  .result{display:flex;justify-content:space-between;gap:16px;padding:11px 0;
+    border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-size:.8rem}
+  .result span:first-child{color:var(--muted)}
+  .result span:last-child{text-align:right}
+
+  h3.sec{font-family:var(--serif);font-weight:400;font-size:.95rem;color:var(--muted);
+    margin:26px 0 12px;letter-spacing:.01em}
+  .hist{display:grid;grid-template-columns:62px 1fr 44px;align-items:center;
+    column-gap:12px;row-gap:4px;margin-bottom:11px}
+  .hist .hday{font:400 .72rem var(--mono);color:var(--muted)}
+  .hist .hbar{height:7px;border-radius:4px;background:rgba(127,216,221,.1);overflow:hidden}
+  .hist .hbar i{display:block;height:100%;border-radius:4px;background:var(--ice-dim)}
+  .hist .hbar i.rec{background:var(--ember)}
+  .hist .hbest{font-family:var(--serif);font-size:.85rem;font-variant-numeric:tabular-nums;
+    text-align:right}
+  .hist .hholds{grid-column:2 / 4;font:400 .68rem var(--mono);color:var(--muted);
+    letter-spacing:.02em}
+  .empty{color:var(--muted);font-size:.84rem;line-height:1.6;margin:0}
 
   /* ---------- Sitzung ---------- */
-  #session{display:flex;min-height:100dvh;flex-direction:column;align-items:center;
-    justify-content:center;gap:0;position:relative;
-    padding:calc(24px + var(--safe-top)) 24px calc(24px + var(--safe-bottom))}
-  .meta{position:absolute;top:calc(20px + var(--safe-top));left:0;right:0;
-    display:flex;justify-content:space-between;padding:0 24px;color:var(--muted);font-size:.85rem}
-  .meta b{font-weight:500;color:var(--paper);font-variant-numeric:tabular-nums}
-
-  .stage{position:relative;width:min(76vw,330px);aspect-ratio:1;display:grid;place-items:center;flex:none}
-  .halo{position:absolute;inset:-14%;border-radius:50%;
-    background:radial-gradient(circle,var(--glow) 0%,transparent 62%);pointer-events:none}
-  .rings{position:absolute;inset:0;display:grid;place-items:center;will-change:transform}
-  .ring{position:absolute;border-radius:50%;border:1px solid var(--accent-dim);opacity:.5}
-  .ring.r1{inset:2%;opacity:.85;border-color:var(--accent)}
-  .ring.r2{inset:14%;opacity:.35}
-  .ring.r3{inset:27%;opacity:.18}
-  .ring.core{inset:36%;border:0;background:radial-gradient(circle,var(--glow),transparent 70%)}
-  .arc{position:absolute;inset:-16px;transform:rotate(-90deg)}
-  .arc circle{fill:none;stroke-width:2;stroke-linecap:round}
-  .arc .track{stroke:rgba(255,255,255,.06)}
-  .arc .prog{stroke:var(--accent);transition:stroke .6s}
-  .center{position:relative;text-align:center;line-height:1}
-  .big{font-family:var(--serif);font-size:3.6rem;font-variant-numeric:tabular-nums;
-    letter-spacing:.01em}
-  .sub{color:var(--muted);font-size:.85rem;margin-top:10px}
-
-  .phase{font-family:var(--serif);font-size:1.7rem;margin-top:34px;min-height:1.3em;
-    letter-spacing:.02em;text-align:center}
-  .cue{color:var(--muted);font-size:.9rem;margin-top:8px;min-height:1.4em;text-align:center;
-    line-height:1.5;max-width:30ch}
-
-  .controls{display:flex;gap:12px;margin-top:38px}
-  .ctl{padding:12px 22px;border-radius:999px;border:1px solid var(--line);background:transparent;
-    color:var(--paper);font-family:inherit;font-size:.9rem;cursor:pointer}
-  .ctl:hover{background:rgba(255,255,255,.05)}
-  .ctl.primary{border-color:var(--accent);color:var(--accent)}
-  .ctl.small{padding:9px 15px;font-size:.82rem;color:var(--muted)}
-  .ctl.small:hover{color:var(--paper)}
-
+  #session{position:relative;min-height:100dvh;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    padding:calc(18px + var(--safe-top)) 26px calc(26px + var(--safe-bottom))}
+  #tide{position:absolute;left:0;right:0;bottom:0;height:22%;
+    background:linear-gradient(180deg,var(--tide-top),var(--tide-bottom));
+    border-top:1px solid var(--tide-line);pointer-events:none;z-index:0}
+  #session > .meta,#session > .count,#session > .say,#session > .controls{
+    position:relative;z-index:1}
   .taparea{position:absolute;inset:0;display:none;cursor:pointer;z-index:2}
   .taparea.on{display:block}
 
-  /* ---------- Abschluss ---------- */
-  .result{display:flex;justify-content:space-between;gap:16px;padding:13px 0;
-    border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-size:.95rem}
-  .result:first-of-type{border-top:1px solid var(--line)}
-  .result span:first-child{color:var(--muted)}
-  .result span:last-child{text-align:right}
-  .record{color:var(--ember);font-size:.9rem;margin:18px 0 0}
-  .centerlink{display:block;margin:16px auto 0}
+  .meta{display:flex;gap:9px;align-items:center;margin-top:10px;flex-wrap:wrap;
+    justify-content:center}
+  .dots{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;max-width:100%}
+  .dots i{display:block;width:26px;height:3px;border-radius:2px;background:rgba(127,216,221,.28)}
+  .dots i.on{background:var(--accent)}
+  body.warm .dots i{background:rgba(233,162,74,.28)}
+  body.warm .dots i.on{background:var(--ember)}
+  .metaLabel{margin-left:8px}
 
-  /* ---------- Statistik ---------- */
-  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
-  .tile{border:1px solid var(--line);border-radius:14px;padding:15px 14px;
-    background:rgba(127,216,221,.04)}
-  .tile .num{font-family:var(--serif);font-size:1.9rem;line-height:1.1;
-    font-variant-numeric:tabular-nums}
-  .tile .cap{color:var(--muted);font-size:.78rem;line-height:1.35;margin-top:6px}
-  .tile.ember{background:rgba(233,162,74,.05);border-color:rgba(233,162,74,.18)}
-  .tile.ember .num{color:var(--ember)}
-  h3.sec{font-family:var(--serif);font-weight:400;font-size:1.15rem;color:var(--muted);
-    margin:30px 0 2px;letter-spacing:.01em}
-  .empty{color:var(--muted);font-size:.88rem;line-height:1.6;margin:12px 0 0}
+  .count{text-align:center}
+  .big{font-family:var(--serif);font-weight:200;font-size:4.6rem;line-height:1;
+    font-variant-numeric:tabular-nums;letter-spacing:.01em}
+  .sub{font-size:.78rem;color:var(--muted);letter-spacing:.06em;margin-top:8px}
+
+  .bestbar{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:18px}
+  .bestline{width:min(64vw,200px);height:1px;background:rgba(233,162,74,.28);position:relative}
+  .bestline i{position:absolute;top:-4px;width:1px;height:9px;background:var(--ember);
+    transition:left .3s linear}
+  .bestlabel{font:400 .68rem var(--mono);color:var(--ember-dim);letter-spacing:.1em}
+
+  .say{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+  .phase{font-family:var(--serif);font-weight:300;font-size:1.65rem;line-height:1.2;
+    min-height:1.2em;letter-spacing:.01em}
+  .cue{color:var(--soft);font-size:.85rem;line-height:1.5;max-width:30ch;min-height:1.4em}
+
+  .controls{display:flex;gap:12px}
+
+  /* ---------- Abschluss ---------- */
+  .done{display:flex;flex-direction:column;justify-content:center;gap:26px;min-height:100dvh}
+  .doneTitle{font-family:var(--serif);font-weight:300;font-size:1.95rem;line-height:1.25;
+    margin:8px 0 0}
+  .doneNote{color:var(--soft);font-size:.82rem;line-height:1.5;margin:0}
+  .record{color:var(--ember);font-size:.82rem;margin:0}
 
   .hidden{display:none !important}
-  @media (max-width:360px){ .big{font-size:3rem} h1{font-size:1.7rem} }
+  @media (max-width:360px){ .big{font-size:3.9rem} .doneTitle{font-size:1.7rem} }
+  @media (max-height:680px){ .big{font-size:3.8rem} .homeStage{width:min(56vw,210px)} }
 </style>
 </head>
 <body>
 
 <!-- ============ STARTBILDSCHIRM ============ -->
 <div class="wrap home" id="home">
+  <div class="brand">Windstille</div>
+
   <button class="homeStage" id="homeStage" aria-label="Sitzung starten">
-    <div class="halo"></div>
-    <div class="rings">
-      <div class="ring r1"></div>
-      <div class="ring r2"></div>
-      <div class="ring r3"></div>
-      <div class="ring core"></div>
-    </div>
+    <div class="level"></div>
+    <div class="homeSummary" id="homeSummary">3 Runden<br>30 Züge</div>
   </button>
 
-  <h1 class="homeTitle">Windstille</h1>
-  <p class="homeSub" id="homeSummary">3 Runden · 30 Atemzüge</p>
-
-  <button class="start" id="startBtn">Sitzung starten</button>
-
-  <p class="homeSafety">Nicht im oder am Wasser, nicht beim Autofahren. Setz oder leg dich hin.</p>
-
-  <nav class="tabbar">
-    <button class="iconbtn slotC" id="toSetup" aria-label="Einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.06A1.7 1.7 0 0 0 8.9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15.1 1.7 1.7 0 0 0 3.04 14H3a2 2 0 1 1 0-4h.06A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 8.9 4.6h.1A1.7 1.7 0 0 0 10 3.04V3a2 2 0 1 1 4 0v.06a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.1a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.06a1.7 1.7 0 0 0-1.54 1.04z"/></svg></button>
-    <button class="iconbtn slotR" id="toStats" aria-label="Statistik" title="Statistik"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.6a.6.6 0 0 0-.6.6V8a3 3 0 0 0 3 3"/><path d="M17 6h2.4a.6.6 0 0 1 .6.6V8a3 3 0 0 1-3 3"/><path d="M12 14v3.8"/><path d="M8.4 21h7.2l-.85-2.25a1 1 0 0 0-.94-.65h-3.62a1 1 0 0 0-.94.65z"/></svg></button>
-  </nav>
+  <div class="homeFoot">
+    <button class="start" id="startBtn">Sitzung starten</button>
+    <p class="homeSafety">Nicht im oder am Wasser, nicht beim Autofahren. Setz oder leg dich hin.</p>
+    <nav class="tabbar">
+      <button class="iconbtn" id="toSetup" aria-label="Einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="8.4" stroke-dasharray="2.6 3.2"/></svg></button>
+      <button class="iconbtn" id="toStats" aria-label="Statistik" title="Statistik"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="4" width="10" height="8" rx="2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="8" y1="19" x2="16" y2="19"/></svg></button>
+    </nav>
+  </div>
 </div>
 
 <!-- ============ EINSTELLUNGEN ============ -->
 <div class="wrap hidden" id="setup">
   <div class="pagehead">
-    <button class="iconbtn plain" id="setupBack" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="iconbtn small" id="setupBack" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
     <h2>Einstellungen</h2>
   </div>
 
@@ -233,7 +268,7 @@
     <div class="label">Atemzüge pro Runde
       <span class="hint">Kräftig ein, locker loslassen</span></div>
     <div class="stepper" data-key="breaths" data-min="10" data-max="60" data-step="1">
-      <button type="button" data-d="-1" aria-label="weniger">−</button>
+      <button type="button" data-d="-1" aria-label="weniger">–</button>
       <div class="val">30</div>
       <button type="button" data-d="1" aria-label="mehr">+</button>
     </div>
@@ -242,7 +277,7 @@
   <div class="row">
     <div class="label">Runden</div>
     <div class="stepper" data-key="rounds" data-min="1" data-max="8" data-step="1">
-      <button type="button" data-d="-1" aria-label="weniger">−</button>
+      <button type="button" data-d="-1" aria-label="weniger">–</button>
       <div class="val">3</div>
       <button type="button" data-d="1" aria-label="mehr">+</button>
     </div>
@@ -250,9 +285,9 @@
 
   <div class="row">
     <div class="label">Atemtempo
-      <span class="hint" id="tempoHint">3,0 s pro Atemzug</span></div>
+      <span class="hint" id="tempoHint">Ein voller Atemzug</span></div>
     <div class="stepper" data-key="cycle" data-min="16" data-max="50" data-step="2">
-      <button type="button" data-d="-1" aria-label="schneller">−</button>
+      <button type="button" data-d="-1" aria-label="schneller">–</button>
       <div class="val">3,0 s</div>
       <button type="button" data-d="1" aria-label="langsamer">+</button>
     </div>
@@ -262,8 +297,8 @@
     <div class="label">Luft anhalten
       <span class="hint" id="modeHint">Feste Zeit pro Runde</span></div>
     <div class="seg" id="modeSeg">
+      <button type="button" data-mode="manual" aria-pressed="false">frei</button>
       <button type="button" data-mode="timed" aria-pressed="true">Zeit</button>
-      <button type="button" data-mode="manual" aria-pressed="false">Manuell</button>
     </div>
   </div>
 
@@ -273,7 +308,7 @@
     <div class="label">Erholungsatem halten
       <span class="hint">Nach dem tiefen Einatmen</span></div>
     <div class="stepper" data-key="recovery" data-min="5" data-max="30" data-step="5">
-      <button type="button" data-d="-1" aria-label="weniger">−</button>
+      <button type="button" data-d="-1" aria-label="weniger">–</button>
       <div class="val">15 s</div>
       <button type="button" data-d="1" aria-label="mehr">+</button>
     </div>
@@ -286,7 +321,7 @@
 
   <div class="row">
     <div class="label">Sprachansagen
-      <span class="hint" id="voiceHint">Runde, Halten, Einatmen</span></div>
+      <span class="hint" id="voiceHint">Deutsche Systemstimme</span></div>
     <div style="display:flex;align-items:center;gap:10px;flex:none">
       <button class="ctl small" type="button" id="voiceTest">Testen</button>
       <button class="switch" type="button" data-key="voice" aria-pressed="true" aria-label="Sprache"></button>
@@ -295,13 +330,15 @@
 
   <p class="safety">Nie im oder am Wasser üben, nicht beim Autofahren oder Stehen. Setz oder leg dich hin. Schwindel und Kribbeln sind normal, Schmerz ist es nicht. Bei Schwangerschaft, Herz-Kreislauf-Erkrankungen oder Epilepsie vorher ärztlich abklären.</p>
 
-  <button class="start" id="setupDone">Fertig</button>
+  <button class="start" id="setupDone" style="margin-top:26px">Fertig</button>
+
+  <p class="foot">Windstille läuft offline. Keine Internet-Berechtigung.</p>
 </div>
 
 <!-- ============ STATISTIK ============ -->
 <div class="wrap hidden" id="stats">
   <div class="pagehead">
-    <button class="iconbtn plain" id="statsBack" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="iconbtn small" id="statsBack" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
     <h2>Statistik</h2>
   </div>
 
@@ -312,6 +349,7 @@
     <div class="tile ember"><div class="num" id="stMax">–</div><div class="cap">Längste Pause überhaupt</div></div>
   </div>
 
+  <h3 class="sec">Im Überblick</h3>
   <div id="statRows"></div>
 
   <h3 class="sec">Letzte Sitzungen</h3>
@@ -322,33 +360,27 @@
 
 <!-- ============ SITZUNG ============ -->
 <div id="session" class="hidden">
+  <div id="tide"></div>
   <div class="taparea" id="tapArea" title="Tippen zum Fortfahren"></div>
+
   <div class="meta">
-    <div>Runde <b id="mRound">1</b> / <b id="mRounds">3</b></div>
-    <div id="mRight">Atemzug <b id="mBreath">0</b> / <b id="mBreaths">30</b></div>
+    <div class="dots" id="dots"></div>
+    <div class="label-mono metaLabel" id="metaLabel">RUNDE 1/3</div>
   </div>
 
-  <div class="stage">
-    <div class="halo"></div>
-    <svg class="arc" viewBox="0 0 100 100" aria-hidden="true">
-      <circle class="track" cx="50" cy="50" r="48"></circle>
-      <circle class="prog" cx="50" cy="50" r="48" id="arcProg"
-              stroke-dasharray="301.6" stroke-dashoffset="301.6"></circle>
-    </svg>
-    <div class="rings" id="rings">
-      <div class="ring r1"></div>
-      <div class="ring r2"></div>
-      <div class="ring r3"></div>
-      <div class="ring core"></div>
-    </div>
-    <div class="center">
-      <div class="big" id="bigNum">3</div>
-      <div class="sub" id="subTxt"></div>
+  <div class="count">
+    <div class="big" id="bigNum">3</div>
+    <div class="sub" id="subTxt"></div>
+    <div class="bestbar hidden" id="bestBar">
+      <div class="bestline"><i id="bestMark" style="left:0%"></i></div>
+      <div class="bestlabel" id="bestLabel">BESTZEIT –</div>
     </div>
   </div>
 
-  <div class="phase" id="phaseTxt">Mach es dir bequem</div>
-  <div class="cue" id="cueTxt">Gleich geht es los</div>
+  <div class="say">
+    <div class="phase" id="phaseTxt">Mach es dir bequem</div>
+    <div class="cue" id="cueTxt">Gleich geht es los</div>
+  </div>
 
   <div class="controls">
     <button class="ctl" id="pauseBtn">Pause</button>
@@ -357,13 +389,25 @@
 </div>
 
 <!-- ============ ABSCHLUSS ============ -->
-<div class="wrap hidden" id="done">
-  <h1>Geschafft</h1>
-  <p class="lede">Bleib noch einen Moment liegen und spür nach.</p>
-  <div id="resultList"></div>
-  <p class="record hidden" id="recordNote">Neue Bestzeit in der Schlussrunde.</p>
-  <button class="start" id="againBtn">Noch eine Sitzung</button>
-  <button class="ctl small centerlink" type="button" id="doneHome">Zum Startbildschirm</button>
+<div class="wrap hidden done" id="done">
+  <div>
+    <div class="label-mono">SITZUNG BEENDET</div>
+    <h1 class="doneTitle" id="doneTitle">Drei Runden.<br>Gut gemacht.</h1>
+  </div>
+
+  <div class="tiles" id="doneTiles"></div>
+
+  <div>
+    <h3 class="sec" style="margin-top:0">Je Durchlauf</h3>
+    <div id="resultList"></div>
+    <p class="record hidden" id="recordNote" style="margin-top:16px">Neue Bestzeit in der Schlussrunde.</p>
+  </div>
+
+  <div>
+    <p class="doneNote" style="margin-bottom:16px">Bleib noch einen Moment liegen, bevor du aufstehst.</p>
+    <button class="start" id="againBtn">Noch eine Sitzung</button>
+    <button class="ctl small centerlink" type="button" id="doneHome">Zum Startbildschirm</button>
+  </div>
 </div>
 
 <script>
@@ -406,6 +450,18 @@ const dateTxt = ms => {
     return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'}) +
       ', ' + d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
   }catch(e){ return d.toLocaleString(); }
+};
+/* kurzes Tagesetikett für den Verlauf: "Mo 15.9." */
+const dayTxt = ms => {
+  const d = new Date(ms);
+  let wd = '';
+  try{ wd = d.toLocaleDateString('de-DE',{weekday:'short'}).replace('.',''); }catch(e){}
+  return wd + ' ' + d.getDate() + '.' + (d.getMonth()+1) + '.';
+};
+const timeTxt = ms => {
+  const d = new Date(ms);
+  try{ return d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}); }
+  catch(e){ return ''; }
 };
 
 /* ---------------------------------------------------------------
@@ -492,7 +548,7 @@ function renderSetup(){
   document.querySelectorAll('#modeSeg button').forEach(b=>
     b.setAttribute('aria-pressed', String(b.dataset.mode===S.mode)));
   $('#modeHint').textContent = S.mode==='timed'
-    ? 'Feste Zeit pro Runde' : 'Selbst beenden – irgendwo tippen';
+    ? 'Feste Zeit pro Runde' : 'Frei: du tippst, wenn du Luft brauchst';
   document.querySelectorAll('.switch').forEach(b=>
     b.setAttribute('aria-pressed', String(!!S[b.dataset.key])));
   renderHolds();
@@ -500,10 +556,10 @@ function renderSetup(){
 }
 
 function renderHome(){
-  const mode = S.mode === 'timed' ? 'feste Haltezeit' : 'manuelles Halten';
-  $('#homeSummary').textContent =
-    S.rounds + (S.rounds === 1 ? ' Runde' : ' Runden') + ' · ' +
-    S.breaths + ' Atemzüge · ' + mode;
+  const mode = S.mode === 'timed' ? 'feste Zeit' : 'frei gehalten';
+  $('#homeSummary').innerHTML =
+    S.rounds + (S.rounds === 1 ? ' Runde' : ' Runden') + '<br>' +
+    S.breaths + ' Züge · ' + mode;
 }
 
 /* ---------------------------------------------------------------
@@ -532,9 +588,19 @@ function renderStats(){
     box.innerHTML = '<p class="empty">Noch nichts aufgezeichnet. Nach der ersten Sitzung ' +
       'steht hier, wie lange du in jedem Durchlauf gehalten hast.</p>';
   }else{
-    box.innerHTML = ST.history.map(s =>
-      `<div class="result"><span>${dateTxt(s.at)}</span>` +
-      `<span>${s.holds.map(h => fmt(h)).join(' · ')}</span></div>`).join('');
+    const best = s => s.holds.length ? Math.max.apply(null, s.holds) : 0;
+    const peak = Math.max(1, Math.max.apply(null, ST.history.map(best)));
+    box.innerHTML = ST.history.map(s=>{
+      const b = best(s);
+      const w = Math.max(3, Math.round(b / peak * 100));
+      const rec = ST.holdMax > 0 && b >= ST.holdMax;
+      return `<div class="hist">` +
+        `<div class="hday">${dayTxt(s.at)}</div>` +
+        `<div class="hbar"><i class="${rec?'rec':''}" style="width:${w}%"></i></div>` +
+        `<div class="hbest">${fmt(b)}</div>` +
+        `<div class="hholds">${timeTxt(s.at)} · ${s.holds.map(h => fmt(h)).join(' · ')}</div>` +
+      `</div>`;
+    }).join('');
   }
 }
 
@@ -570,7 +636,7 @@ function renderHolds(){
     row.className = 'hrow';
     row.innerHTML = `<div class="hname">Halten nach Runde ${i+1}</div>
       <div class="stepper" data-hold="${i}">
-        <button type="button" data-d="-1" aria-label="kürzer">−</button>
+        <button type="button" data-d="-1" aria-label="kürzer">–</button>
         <div class="val">${fmt(S.holds[i])}</div>
         <button type="button" data-d="1" aria-label="länger">+</button>
       </div>`;
@@ -766,26 +832,39 @@ const P = { PREP:'prep', IN:'in', OUT:'out', HOLD:'hold',
 
 let run = false, paused = false, phase = null, t0 = 0, dur = 0;
 let round = 1, breathNo = 0, results = [], wake = null, raf = 0;
-let sessionAt = 0, breathsDone = 0;
+let sessionAt = 0, breathsDone = 0, beatBest = false;
 
 const el = {
-  rings:$('#rings'), arc:$('#arcProg'), big:$('#bigNum'), sub:$('#subTxt'),
-  phase:$('#phaseTxt'), cue:$('#cueTxt'), mRound:$('#mRound'), mRounds:$('#mRounds'),
-  mBreath:$('#mBreath'), mBreaths:$('#mBreaths'), mRight:$('#mRight'),
+  tide:$('#tide'), big:$('#bigNum'), sub:$('#subTxt'),
+  phase:$('#phaseTxt'), cue:$('#cueTxt'),
+  dots:$('#dots'), metaLabel:$('#metaLabel'),
+  bestBar:$('#bestBar'), bestMark:$('#bestMark'), bestLabel:$('#bestLabel'),
   tap:$('#tapArea'), pause:$('#pauseBtn')
 };
-const CIRC = 2 * Math.PI * 48;
+
+/* Wasserlinie: 0 = leere Lunge, 1 = voll */
+function setTide(level){
+  el.tide.style.height = (20 + 54 * Math.max(0, Math.min(1, level))).toFixed(2) + '%';
+}
+
+/* Runden als Striche oben, dazu "RUNDE 2/3" */
+function renderDots(){
+  let h = '';
+  for(let i=0;i<S.rounds;i++) h += '<i' + (i < round ? ' class="on"' : '') + '></i>';
+  el.dots.innerHTML = h;
+  el.metaLabel.textContent = 'RUNDE ' + round + '/' + S.rounds;
+}
 
 function setAccent(warm){
   document.body.classList.toggle('warm', warm);
-  document.documentElement.style.setProperty('--accent', warm ? 'var(--ember)' : 'var(--ice)');
-  document.documentElement.style.setProperty('--accent-dim', warm ? 'var(--ember-dim)' : 'var(--ice-dim)');
-  document.documentElement.style.setProperty('--glow', warm ? 'rgba(233,162,74,.20)' : 'rgba(127,216,221,.20)');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', warm ? '#150d06' : '#06131c');
 }
 
 function go(p){
   phase = p; t0 = clock();
   const inDur = S.cycle * 0.52, outDur = S.cycle * 0.48;
+  el.bestBar.classList.add('hidden');
 
   switch(p){
     case P.PREP:
@@ -793,15 +872,12 @@ function go(p){
       setAccent(false);
       el.phase.textContent = 'Mach es dir bequem';
       el.cue.textContent = 'Sitzend oder liegend. Augen zu.';
-      el.mRight.style.visibility = 'hidden';
       say('Setz oder leg dich hin. Wir beginnen mit Runde ' + round + '.');
       break;
 
     case P.IN:
       breathNo++; breathsDone++;
       dur = inDur;
-      el.mRight.style.visibility = 'visible';
-      el.mBreath.textContent = breathNo;
       el.phase.textContent = 'Einatmen';
       el.cue.textContent = 'Tief in den Bauch, dann in die Brust';
       if(breathNo === 1){ bell(329.6, 1.6, 0.30); bell(493.9, 1.8, 0.26, 0.22); }
@@ -822,9 +898,14 @@ function go(p){
       dur = S.mode === 'timed' ? S.holds[round-1] : Infinity;
       el.phase.textContent = 'Luft anhalten';
       el.cue.textContent = S.mode === 'timed'
-        ? 'Leere Lunge. Ruhig bleiben.'
-        : 'Leere Lunge. Zum Weitermachen irgendwo tippen.';
-      el.mRight.style.visibility = 'hidden';
+        ? 'Der Pegel steht still. Ruhig bleiben.'
+        : 'Der Pegel steht still. Tippen, wenn du Luft brauchst.';
+      beatBest = false;
+      if(ST.holdMax > 0){
+        el.bestLabel.textContent = 'BESTZEIT ' + fmt(ST.holdMax);
+        el.bestMark.style.left = '0%';
+        el.bestBar.classList.remove('hidden');
+      }
       bell(146.8, 3.4, 0.4);
       say('Alles ausatmen und halten.');
       if(S.mode === 'manual') el.tap.classList.add('on');
@@ -861,7 +942,7 @@ function go(p){
       dur = 8;
       el.phase.textContent = 'Runde ' + round + ' geschafft';
       el.cue.textContent = 'Kurz nachspüren, dann geht es weiter';
-      el.mRound.textContent = round;
+      renderDots();
       bell(220, 2.4, 0.26);
       say('Gleich beginnt Runde ' + (round+1) + '.');
       break;
@@ -882,7 +963,7 @@ function next(){
       if(round >= S.rounds){ finish(); }
       else { go(P.REST); }
       break;
-    case P.REST: round++; el.mRound.textContent = round; breathNo = 0; go(P.IN); break;
+    case P.REST: round++; renderDots(); breathNo = 0; go(P.IN); break;
   }
 }
 
@@ -894,82 +975,79 @@ function frame(){
   raf = requestAnimationFrame(frame);
   const t = clock() - t0;
   const p = dur === Infinity ? 0 : Math.min(1, t / dur);
-  let scale = 0.52, arc = 0;
+  let level = 0.12;
 
   switch(phase){
     case P.PREP: {
       const left = Math.ceil(dur - t);
       el.big.textContent = left;
       el.sub.textContent = 'Runde ' + round;
-      scale = 0.52 + 0.04 * Math.sin(t * 1.2);
-      arc = 1 - p;
+      level = 0.10 + 0.03 * Math.sin(t * 1.2);
       if(left <= 3 && left !== lastTickSec && left > 0){ lastTickSec = left; tick(0,.1); }
       break;
     }
     case P.IN:
-      scale = 0.52 + 0.48 * ease(p);
+      level = 0.12 + 0.88 * ease(p);
       el.big.textContent = breathNo;
       el.sub.textContent = 'von ' + S.breaths;
-      arc = breathNo / S.breaths;
       break;
     case P.OUT:
-      scale = 1.0 - 0.48 * ease(p);
+      level = 1.0 - 0.88 * ease(p);
       el.big.textContent = breathNo;
       el.sub.textContent = 'von ' + S.breaths;
-      arc = breathNo / S.breaths;
       break;
     case P.HOLD: {
-      scale = 0.50 + 0.025 * Math.sin(t * 0.9);
+      level = 0.08 + 0.012 * Math.sin(t * 0.9);
       if(dur === Infinity){
         el.big.textContent = fmt(t);
         el.sub.textContent = 'tippen zum Weitermachen';
-        arc = (t % 60) / 60;
       }else{
         const left = dur - t;
         el.big.textContent = fmt(left);
         el.sub.textContent = 'anhalten';
-        arc = 1 - p;
         const l = Math.ceil(left);
         if(l <= 3 && l !== lastTickSec && l > 0){ lastTickSec = l; tick(0,.12); }
+      }
+      if(ST.holdMax > 0){
+        el.bestMark.style.left = Math.min(100, t / ST.holdMax * 100).toFixed(1) + '%';
+        if(!beatBest && t > ST.holdMax){
+          beatBest = true;
+          el.bestLabel.textContent = 'BESTZEIT ÜBERTROFFEN';
+        }
       }
       break;
     }
     case P.REC_IN:
-      scale = 0.52 + 0.48 * ease(p);
+      level = 0.12 + 0.88 * ease(p);
       el.big.textContent = '↑';
       el.sub.textContent = 'einatmen';
-      arc = p;
       break;
     case P.REC_HOLD: {
       const left = dur - t;
-      scale = 1.0 + 0.015 * Math.sin(t*1.1);
+      level = 0.97 + 0.02 * Math.sin(t*1.1);
       el.big.textContent = Math.ceil(left);
       el.sub.textContent = 'halten';
-      arc = 1 - p;
       const l = Math.ceil(left);
       if(l <= 3 && l !== lastTickSec && l > 0){ lastTickSec = l; tick(0,.1); }
       break;
     }
     case P.REC_OUT:
-      scale = 1.0 - 0.48 * ease(p);
+      level = 1.0 - 0.88 * ease(p);
       el.big.textContent = '↓';
       el.sub.textContent = 'ausatmen';
-      arc = 1 - p;
       break;
     case P.REST: {
       const left = dur - t;
-      scale = 0.52 + 0.03 * Math.sin(t*0.8);
+      level = 0.12 + 0.025 * Math.sin(t*0.8);
       el.big.textContent = Math.ceil(left);
       el.sub.textContent = 'bis Runde ' + (round + 1);
-      arc = 1 - p;
       const l = Math.ceil(left);
       if(l <= 3 && l !== lastTickSec && l > 0){ lastTickSec = l; tick(0,.11); }
       break;
     }
   }
 
-  el.rings.style.transform = 'scale(' + scale.toFixed(4) + ')';
-  el.arc.style.strokeDashoffset = (CIRC * (1 - Math.max(0, Math.min(1, arc)))).toFixed(2);
+  setTide(level);
 
   if(dur !== Infinity && t >= dur){ lastTickSec = -1; next(); }
 }
@@ -985,10 +1063,9 @@ async function start(){
 
   run = true; paused = false; round = 1; breathNo = 0; results = [];
   sessionAt = Date.now(); breathsDone = 0;
-  el.mRounds.textContent = S.rounds;
-  el.mBreaths.textContent = S.breaths;
-  el.mRound.textContent = 1;
+  renderDots();
   el.pause.textContent = 'Pause';
+  setTide(0.12);
 
   show('session');
 
@@ -1028,6 +1105,7 @@ function stop(toHomeScreen){
   cancelAnimationFrame(raf);
   stopKeepAlive();
   el.tap.classList.remove('on');
+  el.bestBar.classList.add('hidden');
   shutUp();
   if(ac && ac.state === 'suspended') ac.resume();
   try{ if(wake) wake.release(); }catch(e){}
@@ -1037,18 +1115,50 @@ function stop(toHomeScreen){
   if(toHomeScreen) toHome();
 }
 
+const ZAHL = ['Null','Eine','Zwei','Drei','Vier','Fünf','Sechs','Sieben','Acht'];
+
 function finish(){
   bell(261.6, 3.2, 0.38, 0);
   bell(329.6, 3.4, 0.32, 0.5);
   bell(392.0, 4.0, 0.3, 1.0);
   say('Sitzung beendet. Gut gemacht.');
-  const last = results.length ? results[results.length-1].hold : 0;
+
+  const holds  = results.map(r => Math.max(0, r.hold));
+  const last   = holds.length ? holds[holds.length-1] : 0;
+  const bestNow= holds.length ? Math.max.apply(null, holds) : 0;
   const record = last > 0 && last > ST.holdFinalMax;
-  const list = $('#resultList');
-  list.innerHTML = results.map(r =>
+  /* noch vor commitSession(): die Schlussrunde der vorigen Sitzung */
+  const prev   = ST.history.length ? ST.history[0] : null;
+  const prevLast = prev && prev.holds.length ? prev.holds[prev.holds.length-1] : 0;
+  const spent  = sessionAt ? (Date.now() - sessionAt) / 1000 : 0;
+  const n      = holds.length;
+
+  $('#doneTitle').innerHTML =
+    (ZAHL[n] || n) + (n === 1 ? ' Runde.' : ' Runden.') + '<br>Gut gemacht.';
+
+  let deltaNum = '–', deltaCap = 'gegenüber letztem Mal';
+  if(prevLast){
+    const d = Math.round(last - prevLast);
+    deltaNum = (d >= 0 ? '+' : '−') + Math.abs(d) + ' s';
+  }else{
+    deltaCap = 'erste Sitzung';
+  }
+
+  $('#doneTiles').innerHTML =
+    `<div class="tile ember"><div class="num">${bestNow ? fmt(bestNow) : '–'}</div>` +
+      `<div class="cap">Längste Pause</div></div>` +
+    `<div class="tile ember"><div class="num">${deltaNum}</div>` +
+      `<div class="cap">${deltaCap}</div></div>` +
+    `<div class="tile"><div class="num">${fmtLong(spent)}</div>` +
+      `<div class="cap">Geübte Zeit</div></div>` +
+    `<div class="tile"><div class="num">${breathsDone}</div>` +
+      `<div class="cap">Atemzüge</div></div>`;
+
+  $('#resultList').innerHTML = results.map(r =>
     `<div class="result"><span>Runde ${r.round}</span><span>${fmt(r.hold)} gehalten</span></div>`
   ).join('');
   $('#recordNote').classList.toggle('hidden', !record);
+
   stop(false);
   show('done');
 }
