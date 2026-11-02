@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Keine Internet-Berechtigung: die App läuft vollständig offline. -->
+    <!-- Keine Internet-Berechtigung: die App läuft vollständig offline.
+         allowBackup="false": Einstellungen und Statistik gehen nicht ins Cloud-Backup;
+         gesichert wird nur manuell über Statistik → Sicherung. -->
 
     <queries>
         <intent>
@@ -14,7 +16,7 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/AppTheme"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:hardwareAccelerated="true">
 
         <activity
