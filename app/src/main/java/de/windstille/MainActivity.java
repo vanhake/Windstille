@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -29,6 +30,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
 
     private static final String PREFS = "windstille";
+    private static final String APP_URL_PREFIX = "file:///android_asset/";
 
     private WebView web;
     private TextToSpeech tts;
@@ -75,7 +77,19 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
+        s.setAllowFileAccessFromFileURLs(false);
+        s.setAllowUniversalAccessFromFileURLs(false);
         web.setWebViewClient(new WebViewClient() {
+            /**
+             * Die Brücken AndroidTTS und AndroidStore stehen jeder Seite in dieser
+             * WebView offen. Deshalb darf hier nur die eigene Oberfläche laufen:
+             * jeder Wechsel zu einer anderen Adresse wird verworfen.
+             */
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return !request.getUrl().toString().startsWith(APP_URL_PREFIX);
+            }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 pageReady = true;
@@ -94,7 +108,7 @@ public class MainActivity extends Activity {
 
         setContentView(web);
         hideBars();
-        web.loadUrl("file:///android_asset/index.html");
+        web.loadUrl(APP_URL_PREFIX + "index.html");
     }
 
     /**
