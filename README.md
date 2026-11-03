@@ -6,6 +6,21 @@ Windstille läuft vollständig offline und fordert keine Internet-Berechtigung a
 
 **Download:** Die aktuelle APK liegt unter [Releases](../../releases/latest).
 
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/start.png" width="200" alt="Startbildschirm"></td>
+    <td align="center"><img src="docs/screenshots/sitzung.png" width="200" alt="Laufende Sitzung"></td>
+    <td align="center"><img src="docs/screenshots/einstellungen.png" width="200" alt="Einstellungen"></td>
+    <td align="center"><img src="docs/screenshots/statistik.png" width="200" alt="Statistik"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Start</b><br>Kreis mit Pegel<br>und gewählter Sitzung</td>
+    <td align="center"><b>Sitzung</b><br>Atemzug, Phase<br>und Hinweis</td>
+    <td align="center"><b>Einstellungen</b><br>Atemzüge, Runden,<br>Tempo, Ton</td>
+    <td align="center"><b>Statistik</b><br>Bestzeiten, Überblick<br>und Sicherung</td>
+  </tr>
+</table>
+
 ## So sieht es aus
 
 Die Oberfläche folgt einer Wasserlinie: Ein Pegel steigt beim Einatmen und fällt beim Loslassen.
@@ -21,9 +36,10 @@ Bestzeit bist. Die Sitzung lässt sich jederzeit pausieren oder beenden.
 **Abschluss.** Vier Kacheln fassen die Sitzung zusammen – längste Pause, Unterschied zum letzten
 Mal, geübte Zeit, Atemzüge – darunter jeder Durchlauf einzeln.
 
-**Statistik.** Sitzungen und Durchläufe insgesamt, längste Pause in der Schlussrunde und
-überhaupt, gehaltene und geübte Zeit, Atemzüge, Übungstage und die letzten zwölf Sitzungen als
-Balken.
+**Statistik.** Sitzungen und Durchläufe, die längste Pause in der Schlussrunde und überhaupt.
+Im Überblick: Luft angehalten insgesamt, Schnitt pro Durchlauf, Atemzüge, geübte Zeit, Übungstage
+und die letzte Sitzung. Darunter die letzten zwölf Sitzungen als Balken, mit der Haltezeit jedes
+Durchlaufs.
 
 ## Einstellungen
 
