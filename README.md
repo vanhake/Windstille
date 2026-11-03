@@ -41,6 +41,19 @@ in den SharedPreferences der App ab; außerhalb der App greift sie auf
 `localStorage` zurück. Gezählt wird jede Sitzung mit mindestens einem
 abgeschlossenen Durchlauf, auch eine vorzeitig beendete.
 
+### Sicherung
+
+Die Daten verlassen das Handy nicht von selbst: `allowBackup` ist aus,
+es gibt kein Android-Cloud-Backup. Unter **Statistik → Sicherung** lassen
+sich Einstellungen und Statistik als JSON-Datei exportieren und wieder
+importieren, etwa beim Wechsel auf ein neues Handy. Die Datei wählt man
+über die Dateiauswahl des Systems (`window.AndroidBackup`), eine
+Speicher-Berechtigung braucht die App dafür nicht. Beim Import übernimmt
+die Oberfläche nur bekannte Felder und wandelt sie in Zahlen um, die auf
+die erlaubten Bereiche begrenzt werden. Eine veränderte Datei kann so
+keinen Code in die Oberfläche schleusen. Der Import ersetzt die
+vorhandene Statistik.
+
 ## APK bauen – Weg 1: Android Studio
 
 1. Android Studio öffnen, **Open** und diesen Ordner wählen.

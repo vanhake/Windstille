@@ -1,9 +1,11 @@
 package de.windstille;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -12,10 +14,18 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -29,6 +39,14 @@ import java.util.Locale;
 public class MainActivity extends Activity {
 
     private static final String PREFS = "windstille";
+    private static final String APP_URL_PREFIX = "file:///android_asset/";
+    private static final int REQ_EXPORT = 1;
+    private static final int REQ_IMPORT = 2;
+    /** Eine Sicherung ist wenige KB groß; mehr wird beim Import nicht gelesen. */
+    private static final int MAX_BACKUP_BYTES = 1024 * 1024;
+
+    /** Inhalt des laufenden Exports, bis der Nutzer den Speicherort gewählt hat. */
+    private String pendingExport;
 
     private WebView web;
     private TextToSpeech tts;
@@ -75,7 +93,19 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
+        s.setAllowFileAccessFromFileURLs(false);
+        s.setAllowUniversalAccessFromFileURLs(false);
         web.setWebViewClient(new WebViewClient() {
+            /**
+             * Die Brücken AndroidTTS und AndroidStore stehen jeder Seite in dieser
+             * WebView offen. Deshalb darf hier nur die eigene Oberfläche laufen:
+             * jeder Wechsel zu einer anderen Adresse wird verworfen.
+             */
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return !request.getUrl().toString().startsWith(APP_URL_PREFIX);
+            }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 pageReady = true;
@@ -91,10 +121,11 @@ public class MainActivity extends Activity {
         web.setBackgroundColor(0xFF06131C);
         web.addJavascriptInterface(new TtsBridge(), "AndroidTTS");
         web.addJavascriptInterface(new StoreBridge(), "AndroidStore");
+        web.addJavascriptInterface(new BackupBridge(), "AndroidBackup");
 
         setContentView(web);
         hideBars();
-        web.loadUrl("file:///android_asset/index.html");
+        web.loadUrl(APP_URL_PREFIX + "index.html");
     }
 
     /**
@@ -224,6 +255,105 @@ public class MainActivity extends Activity {
             if (key == null) return;
             prefs.edit().remove(key).apply();
         }
+    }
+
+    /**
+     * Von der Web-Oberfläche aufgerufen: window.AndroidBackup.exportData(json, name)
+     * bzw. importData(). Die Datei wählt der Nutzer über die Dateiauswahl des
+     * Systems; die App braucht dafür keine Speicher-Berechtigung.
+     */
+    private class BackupBridge {
+        @JavascriptInterface
+        public void exportData(String json, String fileName) {
+            if (json == null) return;
+            runOnUiThread(() -> {
+                pendingExport = json;
+                Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT)
+                        .addCategory(Intent.CATEGORY_OPENABLE)
+                        .setType("application/json")
+                        .putExtra(Intent.EXTRA_TITLE,
+                                fileName != null ? fileName : "windstille-sicherung.json");
+                try {
+                    startActivityForResult(i, REQ_EXPORT);
+                } catch (Exception e) {
+                    pendingExport = null;
+                    backupResult(false, "Keine Dateiauswahl verfügbar.");
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void importData() {
+            runOnUiThread(() -> {
+                // Viele Dateimanager melden .json als octet-stream oder text/plain.
+                Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT)
+                        .addCategory(Intent.CATEGORY_OPENABLE)
+                        .setType("*/*")
+                        .putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
+                                "application/json", "application/octet-stream", "text/plain"});
+                try {
+                    startActivityForResult(i, REQ_IMPORT);
+                } catch (Exception e) {
+                    backupResult(false, "Keine Dateiauswahl verfügbar.");
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Uri uri = (resultCode == RESULT_OK && data != null) ? data.getData() : null;
+        if (requestCode == REQ_EXPORT) {
+            String json = pendingExport;
+            pendingExport = null;
+            if (uri == null || json == null) return;
+            try (OutputStream out = getContentResolver().openOutputStream(uri, "wt")) {
+                if (out == null) throw new IOException("Kein Ausgabestrom");
+                out.write(json.getBytes(StandardCharsets.UTF_8));
+                backupResult(true, "Sicherung gespeichert.");
+            } catch (Exception e) {
+                backupResult(false, "Sicherung konnte nicht gespeichert werden.");
+            }
+        } else if (requestCode == REQ_IMPORT) {
+            if (uri == null) return;
+            String text;
+            try {
+                text = readLimited(uri);
+            } catch (Exception e) {
+                backupResult(false, e instanceof TooLarge
+                        ? "Die Datei ist zu groß für eine Sicherung."
+                        : "Die Datei konnte nicht gelesen werden.");
+                return;
+            }
+            // JSONObject.quote macht aus dem Dateiinhalt ein sicheres JS-Zeichenkettenliteral.
+            evaluate("window.windstilleImport && window.windstilleImport(" + JSONObject.quote(text) + ")");
+        }
+    }
+
+    private static class TooLarge extends IOException { }
+
+    private String readLimited(Uri uri) throws IOException {
+        try (InputStream in = getContentResolver().openInputStream(uri)) {
+            if (in == null) throw new IOException("Kein Eingabestrom");
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            byte[] block = new byte[8192];
+            int n;
+            while ((n = in.read(block)) > 0) {
+                if (buf.size() + n > MAX_BACKUP_BYTES) throw new TooLarge();
+                buf.write(block, 0, n);
+            }
+            return new String(buf.toByteArray(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private void backupResult(boolean ok, String message) {
+        evaluate("window.windstilleBackupResult && window.windstilleBackupResult("
+                + ok + "," + JSONObject.quote(message) + ")");
+    }
+
+    private void evaluate(String js) {
+        if (web != null) web.evaluateJavascript(js, null);
     }
 
     @Override

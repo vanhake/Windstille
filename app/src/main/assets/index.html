@@ -96,6 +96,8 @@
     border-color:var(--line)}
   .ctl.small:hover{color:var(--paper)}
   .centerlink{display:block;margin:16px auto 0}
+  .backupBtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .backupNote{color:var(--muted);font-size:.74rem;line-height:1.4;text-align:center;margin:10px 8px 0;min-height:1em}
 
   .label-mono{font:400 .7rem/1.4 var(--mono);color:var(--muted);letter-spacing:.1em}
 
@@ -355,6 +357,14 @@
   <h3 class="sec">Letzte Sitzungen</h3>
   <div id="statHistory"></div>
 
+  <h3 class="sec">Sicherung</h3>
+  <div class="backupBtns">
+    <button class="ctl small" type="button" id="backupExport">Daten exportieren</button>
+    <button class="ctl small" type="button" id="backupImport">Daten importieren</button>
+  </div>
+  <p class="backupNote" id="backupNote">Einstellungen und Statistik als Datei sichern. Die App legt keine Sicherung in der Cloud an.</p>
+  <input type="file" id="backupFile" accept="application/json,.json" class="hidden">
+
   <button class="ctl small centerlink" type="button" id="statReset">Statistik zurücksetzen</button>
 </div>
 
@@ -426,6 +436,9 @@ const S = {
   sound: true,
   voice: true
 };
+
+/* unveränderte Standardwerte, Vorlage für die Prüfung importierter Einstellungen */
+const S_DEFAULTS = JSON.parse(JSON.stringify(S));
 
 const $ = s => document.querySelector(s);
 const fmt = s => {
@@ -1190,6 +1203,115 @@ $('#statReset').addEventListener('click', e=>{
   ST = emptyStats();
   saveStats();
   renderStats();
+});
+
+/* ---------------------------------------------------------------
+   Sicherung: Export und Import von Einstellungen und Statistik.
+   In der App über window.AndroidBackup (Dateiauswahl des Systems),
+   im Browser als Download bzw. über ein Datei-Eingabefeld.
+--------------------------------------------------------------- */
+const BACKUP_APP = 'windstille';
+const BACKUP_VERSION = 1;
+
+const num = (v, min, max, fallback) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+};
+
+/* Übernimmt nur bekannte Felder mit passendem Typ. Die Werte landen später
+   per innerHTML in der Oberfläche, deshalb wird alles zu Zahlen bzw.
+   geprüften Zeichenketten umgewandelt – Text aus der Datei kommt nie durch. */
+function cleanSettings(raw){
+  const out = JSON.parse(JSON.stringify(S_DEFAULTS));
+  if(!raw || typeof raw !== 'object') return out;
+  out.breaths  = Math.round(num(raw.breaths, 10, 60, out.breaths));
+  out.rounds   = Math.round(num(raw.rounds, 1, 8, out.rounds));
+  out.cycle    = Math.round(num(raw.cycle, 1.6, 5, out.cycle) * 10) / 10;
+  out.mode     = raw.mode === 'manual' ? 'manual' : 'timed';
+  out.recovery = Math.round(num(raw.recovery, 5, 30, out.recovery));
+  out.sound    = raw.sound !== false;
+  out.voice    = raw.voice !== false;
+  if(Array.isArray(raw.holds)){
+    out.holds = out.holds.map((d, i) => Math.round(num(raw.holds[i], 15, 600, d)));
+  }
+  return out;
+}
+
+function cleanStats(raw){
+  const out = emptyStats();
+  if(!raw || typeof raw !== 'object') return out;
+  for(const k of ['sessions','rounds','breaths','holdTotal','holdMax','holdFinalMax','timeTotal','lastAt']){
+    out[k] = num(raw[k], 0, Number.MAX_SAFE_INTEGER, 0);
+  }
+  if(Array.isArray(raw.days)){
+    out.days = raw.days.filter(d => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)).slice(-400);
+  }
+  if(Array.isArray(raw.history)){
+    out.history = raw.history.slice(0, 12)
+      .filter(h => h && typeof h === 'object' && Array.isArray(h.holds))
+      .map(h => {
+        const holds = h.holds.slice(0, 20).map(x => Math.round(num(x, 0, 36000, 0)));
+        return { at: num(h.at, 0, Number.MAX_SAFE_INTEGER, 0), rounds: holds.length, holds };
+      });
+  }
+  return out;
+}
+
+function backupNote(text){ $('#backupNote').textContent = text; }
+
+function backupText(){
+  return JSON.stringify({
+    app: BACKUP_APP, version: BACKUP_VERSION, exportedAt: new Date().toISOString(),
+    settings: S, stats: ST
+  }, null, 2);
+}
+
+/* Von der App nach der Dateiauswahl aufgerufen, im Browser vom Datei-Feld. */
+window.windstilleImport = function(text){
+  let data;
+  try{ data = JSON.parse(text); }catch(e){ backupNote('Die Datei ist keine gültige Sicherung.'); return; }
+  if(!data || data.app !== BACKUP_APP){ backupNote('Die Datei ist keine Windstille-Sicherung.'); return; }
+  if(!(data.version >= 1 && data.version <= BACKUP_VERSION)){
+    backupNote('Diese Sicherung stammt aus einer neueren Version der App.'); return;
+  }
+  Object.assign(S, cleanSettings(data.settings));
+  ST = cleanStats(data.stats);
+  save(); saveStats();
+  renderSetup(); renderStats();
+  backupNote('Sicherung eingespielt: ' + ST.sessions + (ST.sessions === 1 ? ' Sitzung.' : ' Sitzungen.'));
+};
+
+/* Von der App aufgerufen, wenn Export oder Import abgeschlossen ist. */
+window.windstilleBackupResult = function(ok, message){ backupNote(message); };
+
+$('#backupExport').addEventListener('click', ()=>{
+  const name = 'windstille-sicherung-' + dayKey(new Date()) + '.json';
+  if(window.AndroidBackup && window.AndroidBackup.exportData){
+    window.AndroidBackup.exportData(backupText(), name);
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([backupText()], {type:'application/json'}));
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  backupNote('Sicherung heruntergeladen.');
+});
+
+$('#backupImport').addEventListener('click', ()=>{
+  if(window.AndroidBackup && window.AndroidBackup.importData){
+    window.AndroidBackup.importData();
+    return;
+  }
+  $('#backupFile').click();
+});
+
+$('#backupFile').addEventListener('change', e=>{
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!f) return;
+  if(f.size > 1024*1024){ backupNote('Die Datei ist zu groß für eine Sicherung.'); return; }
+  f.text().then(window.windstilleImport, ()=>backupNote('Die Datei konnte nicht gelesen werden.'));
 });
 
 $('#voiceTest').addEventListener('click', ()=>{
